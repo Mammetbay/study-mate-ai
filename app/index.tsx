@@ -9,7 +9,13 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+      <Text
+        style={{
+          fontSize: 48,
+          color: '#ddab15e9',
+          fontWeight: '600'
+        }}
+      >Hello World!</Text>
     </View>
   );
 }

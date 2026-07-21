@@ -19,6 +19,7 @@ React Native + Expo ile geliştirilen, satılabilir bir kod şablonu (Codester).
 - Yerel veri: expo-sqlite — backend/API sunucusu YOK
 - Stil: StyleSheet + `lib/theme.ts` — NativeWind/Tailwind YOK
 - i18n: react-i18next, diller `config/languages.ts`'den okunur
+- Ses/Video: expo-audio ve expo-video (Eski olan expo-av KULLANILMAZ)
 - AI: Groq Whisper (transkript), Groq Vision (fotoğraf OCR), Groq Llama (özet/quiz)
 
 ## Build & Çalıştırma

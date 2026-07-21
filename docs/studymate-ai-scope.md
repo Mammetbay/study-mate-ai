@@ -13,7 +13,7 @@
 ## 2. Özellik Kapsamı
 
 ### Dahil (MVP)
-- Sesli ders kaydı (expo-av)
+- Sesli ders kaydı (expo-audio)
 - **Fotoğraf çekerek veya galeriden yükleyerek not oluşturma** (defter/slayt fotoğrafından metin çıkarma — Groq Vision/OCR)
 - Otomatik transkript (Groq Whisper — ses için) / OCR (Groq Vision — fotoğraf için)
 - Otomatik özet (Groq Llama)
@@ -24,7 +24,7 @@
 - Onboarding (3 ekran)
 
 ### Dahil DEĞİL (bilinçli kapsam dışı — scope creep yapma)
-- Kullanıcı hesabı / login sistemi (mock yeterli, gerçek auth yok)
+- Kullanıcı hesabı / login sistemi (mock yeterli, GERÇEK auth yok)
 - Ödeme / abonelik sistemi
 - Bulut senkronizasyonu / multi-device
 - Gerçek zamanlı işbirliği
@@ -40,7 +40,7 @@
 | Navigasyon | Expo Router (tab + stack) | |
 | State | Context API | Redux/Zustand gereksiz bu boyutta |
 | Yerel veri | expo-sqlite | Notlar, quiz'ler, flashcard'lar cihazda saklanır |
-| Ses kaydı | expo-av | |
+| Ses kaydı | expo-audio | |
 | Transkript (ses) | Groq `whisper-large-v3-turbo` | Ücretsiz tier: günde 2000 istek, kart gerekmez |
 | OCR (fotoğraf) | Groq Vision modeli (ör. `llama-4-scout-17b-16e-instruct`) | Groq'un resmi dokümantasyonunda OCR use-case'i olarak destekleniyor. ⚠️ Build sırasında model adını console.groq.com/docs/vision'dan doğrula — model isimleri zaman zaman değişiyor/deprecate oluyor |
 | Özet + Quiz üretimi | Groq Llama (metin modeli) | Build sırasında console.groq.com/docs/models'dan güncel/aktif model adını doğrula |
