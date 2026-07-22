@@ -1,0 +1,115 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "or": "or",
+    "seeAll": "See all",
+    "getStarted": "Get Started",
+    "done": "Done"
+  },
+  "tabs": {
+    "home": "Home",
+    "notes": "Notes",
+    "quiz": "Quiz",
+    "settings": "Settings"
+  },
+  "onboarding": {
+    "slide1Title": "Record Your Lectures",
+    "slide1Desc": "Tap record during class. StudyMate AI captures every word so you never miss a thing.",
+    "slide2Title": "Get Instant AI Summaries",
+    "slide2Desc": "AI reads your recordings and notes, then delivers clean, structured summaries in seconds.",
+    "slide3Title": "Practice with Quizzes & Flashcards",
+    "slide3Desc": "Auto-generated quizzes and flashcards from your notes help you retain what matters most."
+  },
+  "home": {
+    "goodMorning": "Good morning,",
+    "goodAfternoon": "Good afternoon,",
+    "goodEvening": "Good evening,",
+    "userName": "Student",
+    "dayStreak": "Day streak",
+    "totalNotes": "Total notes",
+    "weeklyGoal": "Weekly goal",
+    "notesReviewed": "{{current}} of {{total}} notes reviewed",
+    "recentNotes": "Recent Notes",
+    "noNotesYet": "No notes yet",
+    "noNotesDesc": "Record a lecture or scan your notes to get started.",
+    "createFirstNote": "Create Your First Note"
+  },
+  "notes": {
+    "title": "Notes",
+    "searchPlaceholder": "Search notes...",
+    "lecture": "Lecture",
+    "photo": "Photo",
+    "emptyTitle": "No notes yet",
+    "emptyDesc": "Tap the + button to create your first note."
+  },
+  "createNote": {
+    "title": "New Note",
+    "noteTitle": "Note title",
+    "noteTitlePlaceholder": "e.g. Lecture 5 — ML Basics",
+    "chooseInput": "Choose input method",
+    "recordAudio": "Record Audio",
+    "recordAudioDesc": "Tap the mic to start recording your lecture",
+    "photoUpload": "Photo / Upload",
+    "photoUploadDesc": "Scan handwritten or printed lecture notes",
+    "camera": "Camera",
+    "gallery": "Gallery",
+    "files": "Files",
+    "recording": "Recording...",
+    "stopRecording": "Stop"
+  },
+  "quiz": {
+    "title": "Quiz",
+    "emptyTitle": "No quizzes yet",
+    "emptyDesc": "Generate a quiz from your notes to test your knowledge.",
+    "questionOf": "Question {{current}} of {{total}}",
+    "nextQuestion": "Next Question",
+    "generateQuiz": "Generate Quiz",
+    "generateFlashcards": "Generate Flashcards"
+  },
+  "flashcards": {
+    "title": "Flashcards",
+    "front": "FRONT",
+    "tapToFlip": "Tap to flip",
+    "answerHidden": "Answer hidden — tap card to reveal",
+    "previous": "Previous",
+    "known": "Known",
+    "missed": "Missed",
+    "remaining": "Remaining"
+  },
+  "noteDetail": {
+    "summary": "Summary",
+    "transcript": "Transcript",
+    "aiSummary": "AI SUMMARY",
+    "keyPoints": "KEY POINTS"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "LANGUAGE",
+    "appLanguage": "App Language",
+    "appearance": "APPEARANCE",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "aiConfiguration": "AI CONFIGURATION",
+    "apiKey": "Groq API Key",
+    "apiKeyPlaceholder": "Enter your Groq API key",
+    "apiKeyHint": "Your key is stored locally and never shared. Used for AI transcription, summaries, and quiz generation.",
+    "saveKey": "Save Key",
+    "about": "ABOUT",
+    "version": "Version",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "contactSupport": "Contact Support",
+    "clearAllNotes": "Clear All Notes",
+    "clearConfirmTitle": "Clear All Notes?",
+    "clearConfirmMessage": "This will permanently delete all your notes, quizzes, and flashcards. This action cannot be undone.",
+    "keySaved": "API key saved successfully"
+  }
+}

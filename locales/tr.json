@@ -1,0 +1,115 @@
+{
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "loading": "Yükleniyor...",
+    "back": "Geri",
+    "next": "İleri",
+    "skip": "Atla",
+    "or": "veya",
+    "seeAll": "Tümünü gör",
+    "getStarted": "Başla",
+    "done": "Tamam"
+  },
+  "tabs": {
+    "home": "Ana Sayfa",
+    "notes": "Notlar",
+    "quiz": "Quiz",
+    "settings": "Ayarlar"
+  },
+  "onboarding": {
+    "slide1Title": "Derslerinizi Kaydedin",
+    "slide1Desc": "Ders sırasında kayıt butonuna basın. StudyMate AI her kelimeyi yakalar, hiçbir şeyi kaçırmazsınız.",
+    "slide2Title": "Anında AI Özetleri Alın",
+    "slide2Desc": "AI kayıtlarınızı ve notlarınızı okur, saniyeler içinde temiz, yapılandırılmış özetler sunar.",
+    "slide3Title": "Quiz ve Flashcard'larla Pratik Yapın",
+    "slide3Desc": "Notlarınızdan otomatik oluşturulan quiz ve flashcard'lar en önemli bilgileri aklınızda tutmanıza yardımcı olur."
+  },
+  "home": {
+    "goodMorning": "Günaydın,",
+    "goodAfternoon": "İyi öğleden sonralar,",
+    "goodEvening": "İyi akşamlar,",
+    "userName": "Öğrenci",
+    "dayStreak": "Gün serisi",
+    "totalNotes": "Toplam not",
+    "weeklyGoal": "Haftalık hedef",
+    "notesReviewed": "{{total}} nottan {{current}} tanesi incelendi",
+    "recentNotes": "Son Notlar",
+    "noNotesYet": "Henüz not yok",
+    "noNotesDesc": "Bir ders kaydedin veya notlarınızı tarayarak başlayın.",
+    "createFirstNote": "İlk Notunuzu Oluşturun"
+  },
+  "notes": {
+    "title": "Notlar",
+    "searchPlaceholder": "Notlarda ara...",
+    "lecture": "Ders",
+    "photo": "Fotoğraf",
+    "emptyTitle": "Henüz not yok",
+    "emptyDesc": "İlk notunuzu oluşturmak için + butonuna basın."
+  },
+  "createNote": {
+    "title": "Yeni Not",
+    "noteTitle": "Not başlığı",
+    "noteTitlePlaceholder": "ör. Ders 5 — ML Temelleri",
+    "chooseInput": "Giriş yöntemini seçin",
+    "recordAudio": "Ses Kaydet",
+    "recordAudioDesc": "Dersinizi kaydetmek için mikrofona dokunun",
+    "photoUpload": "Fotoğraf / Yükle",
+    "photoUploadDesc": "El yazısı veya basılı ders notlarınızı tarayın",
+    "camera": "Kamera",
+    "gallery": "Galeri",
+    "files": "Dosyalar",
+    "recording": "Kaydediliyor...",
+    "stopRecording": "Durdur"
+  },
+  "quiz": {
+    "title": "Quiz",
+    "emptyTitle": "Henüz quiz yok",
+    "emptyDesc": "Bilginizi test etmek için notlarınızdan bir quiz oluşturun.",
+    "questionOf": "Soru {{current}} / {{total}}",
+    "nextQuestion": "Sonraki Soru",
+    "generateQuiz": "Quiz Oluştur",
+    "generateFlashcards": "Flashcard Oluştur"
+  },
+  "flashcards": {
+    "title": "Flashcard'lar",
+    "front": "ÖN",
+    "tapToFlip": "Çevirmek için dokun",
+    "answerHidden": "Cevap gizli — görmek için karta dokun",
+    "previous": "Önceki",
+    "known": "Bilinen",
+    "missed": "Kaçırılan",
+    "remaining": "Kalan"
+  },
+  "noteDetail": {
+    "summary": "Özet",
+    "transcript": "Transkript",
+    "aiSummary": "AI ÖZETİ",
+    "keyPoints": "ÖNEMLİ NOKTALAR"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "language": "DİL",
+    "appLanguage": "Uygulama Dili",
+    "appearance": "GÖRÜNÜM",
+    "theme": "Tema",
+    "dark": "Koyu",
+    "light": "Açık",
+    "aiConfiguration": "AI YAPILANDIRMASI",
+    "apiKey": "Groq API Anahtarı",
+    "apiKeyPlaceholder": "Groq API anahtarınızı girin",
+    "apiKeyHint": "Anahtarınız yerel olarak saklanır ve paylaşılmaz. AI transkripsiyon, özetleme ve quiz üretimi için kullanılır.",
+    "saveKey": "Anahtarı Kaydet",
+    "about": "HAKKINDA",
+    "version": "Sürüm",
+    "privacyPolicy": "Gizlilik Politikası",
+    "termsOfService": "Kullanım Koşulları",
+    "contactSupport": "Destek İletişimi",
+    "clearAllNotes": "Tüm Notları Sil",
+    "clearConfirmTitle": "Tüm Notlar Silinsin mi?",
+    "clearConfirmMessage": "Bu işlem tüm notlarınızı, quizlerinizi ve flashcard'larınızı kalıcı olarak silecektir. Bu işlem geri alınamaz.",
+    "keySaved": "API anahtarı başarıyla kaydedildi"
+  }
+}
