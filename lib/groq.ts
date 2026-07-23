@@ -19,20 +19,38 @@ interface WhisperVerboseResponse {
   duration: number;
 }
 
-// --- Whisper Hallucination Patterns ---
+// --- Whisper Hallucination & Text Normalization ---
 
-const HALLUCINATION_PATTERNS = [
-  'i̇zlediğiniz için teşekkürler',
-  'izlediğiniz için teşekkürler',
-  'abone olmayı unutmayın',
-  'beğenmeyi ve abone olmayı',
-  'bir sonraki videoda görüşmek üzere',
+function normalizeText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/i̇/g, 'i')
+    .replace(/ı/g, 'i')
+    .replace(/ş/g, 's')
+    .replace(/ç/g, 'c')
+    .replace(/ö/g, 'o')
+    .replace(/ü/g, 'u')
+    .replace(/ğ/g, 'g')
+    .replace(/[^a-z0-9\s]/gi, '')
+    .trim();
+}
+
+const HALLUCINATION_TRIGGERS = [
+  'izlediginiz icin tesekkur',
+  'tesekkur ederim',
+  'tesekkurler',
+  'abone ol',
+  'begenmeyi ve abone',
+  'gorusmek uzere',
+  'altyazi',
   'thanks for watching',
   'thank you for watching',
   'subtitles by',
   'subscribe to',
   'like and subscribe',
   'please subscribe',
+  'bye bye',
+  'see you next time',
 ];
 
 // --- Audio Transcription ---
@@ -50,18 +68,21 @@ function validateAudioTranscript(whisperResponse: WhisperVerboseResponse): strin
     throw new Error('NO_SPEECH_DETECTED');
   }
 
-  // 2. High average no_speech_prob across segments → likely silence/noise
+  // 2. High no_speech_prob across segments → silence/noise
   if (segments.length > 0) {
     const avgNoSpeechProb =
       segments.reduce((sum, s) => sum + (s.no_speech_prob ?? 0), 0) / segments.length;
-    if (avgNoSpeechProb > 0.6) {
+    const maxNoSpeechProb = Math.max(...segments.map((s) => s.no_speech_prob ?? 0));
+
+    if (avgNoSpeechProb > 0.4 || maxNoSpeechProb > 0.7) {
       throw new Error('NO_SPEECH_DETECTED');
     }
   }
 
-  // 3. Known Whisper hallucination patterns (common on silent audio)
-  const lowerText = fullText.toLowerCase();
-  if (HALLUCINATION_PATTERNS.some((p) => lowerText.includes(p))) {
+  // 3. Normalized check for common YouTube subtitle hallucination patterns
+  const normalized = normalizeText(fullText);
+
+  if (HALLUCINATION_TRIGGERS.some((trigger) => normalized.includes(trigger))) {
     throw new Error('NO_SPEECH_DETECTED');
   }
 
@@ -91,10 +112,17 @@ export async function transcribeAudio(
     name: filename.includes('.') ? filename : `${filename}.${ext}`,
   };
 
+  const initialPrompt =
+    language === 'tr'
+      ? 'Ders anlatımı, öğretmen ve öğrenci konuşması, ders notları kaydı. Altyazı veya video kapanış metni içermez.'
+      : 'Lecture recording, classroom talk, teacher and student discussion. No video subtitles or outros.';
+
   formData.append('file', file as any);
   formData.append('model', 'whisper-large-v3-turbo');
   formData.append('language', language);
   formData.append('response_format', 'verbose_json');
+  formData.append('temperature', '0.0');
+  formData.append('prompt', initialPrompt);
 
   try {
     const response = await fetch(`${GROQ_API_URL}/audio/transcriptions`, {
