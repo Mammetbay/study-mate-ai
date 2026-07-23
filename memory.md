@@ -33,3 +33,13 @@ Bu dosya, projenin gelişimini, alınan kararları ve tamamlanan adımları taki
 *   **Ses ve Fotoğraf Kaydı:** `app/create-note.tsx` ekranında kurala uygun olarak yeni nesil `expo-audio` paketi kullanılarak ses kayıt altyapısı (başlat, bitir, timer) ve `expo-image-picker` ile fotoğraf çekme/galeri seçme özellikleri eklendi. Alınan ses/fotoğraf verileri Groq'a gönderilerek metne dönüştürülüyor.
 *   **Dinamik Not Listesi:** `app/(tabs)/notes.tsx` güncellenerek statik placeholder yerine SQLite veritabanındaki notların listelendiği, sayfa her açıldığında yenilenen dinamik yapı (FlatList) kuruldu.
 *   **Not Detay Sayfası:** Oluşturulan notu görüntülemek için `app/note/[id].tsx` iskeleti kuruldu.
+
+## [2026-07-23] - Kritik Hata Düzeltmeleri ve AI Çıktı Doğrulaması
+*   **Veritabanı Syntax ve Bağlantı Düzeltmesi (NullPointerException):** `lib/db.ts` içerisindeki fazladan `);` syntax hatası giderildi, `SQLiteProvider` inisiyalizasyon çökmesi engellendi. `app/create-note.tsx`, `app/(tabs)/notes.tsx` ve `app/note/[id].tsx` ekranlarında `useSQLiteContext()` hook'u entegre edilerek `db` parametre geçişleri düzeltildi.
+*   **React Native FormData Boundary Düzeltmesi:** `lib/groq.ts` içindeki `transcribeAudio` fonksiyonunda manuel eklenen `'Content-Type': 'multipart/form-data'` başlığı kaldırıldı. React Native'in otomatik `boundary` parametresi oluşturması sağlanarak Groq API 400 (`could not process file - is it a valid media file?`) hatası tamamen çözüldü.
+*   **Groq Vision OCR Temizliği:** `lib/groq.ts` içindeki OCR sistem komutları `system` rolüne taşındı. Olası `<think>...</think>` blokları ve markdown üst-veri (`**...**`) temizliği güçlendirildi; metinsiz görseller için `NO_READABLE_TEXT` kontrolü eklendi.
+*   **Whisper Halüsinasyon ve Sessizlik Engelleme:**
+    *   Whisper API isteğinde `temperature: '0.0'` kullanılarak deterministik çıktı sağlandı.
+    *   `prompt` alanına ders/sınıf konuşması bağlamı eklenerek YouTube altyazı kalıpları engellendi.
+    *   `normalizeText` fonksiyonu yazılarak Türkçe özel karakterler ve uzantılar için bağışık arama sağlandı.
+    *   `avgNoSpeechProb > 0.4` ve `maxNoSpeechProb > 0.7` eşik değerleri ile `HALLUCINATION_TRIGGERS` süzgeci entegre edildi. Sessiz ve uydurma kayıtlar veritabanına yazılmadan `NO_SPEECH_DETECTED` hatası verilecek şekilde UI uyarısı sağlandı.
