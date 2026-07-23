@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,24 +13,93 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../lib/theme';
-import { useThemeColors } from '../lib/AppContext';
+import { useAppContext, useThemeColors } from '../lib/AppContext';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { useAudioRecorder, useAudioRecorderState, RecordingPresets, requestRecordingPermissionsAsync } from 'expo-audio';
+import { transcribeAudio, extractTextFromImage } from '../lib/groq';
+import { insertNote } from '../lib/db';
+import { Note } from '../types';
 
 export default function CreateNoteScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { apiKey, language } = useAppContext();
   const colors = useThemeColors();
 
   const [noteTitle, setNoteTitle] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Audio hooks
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const audioState = useAudioRecorderState(audioRecorder, 500);
+
+  const generateId = () => Date.now().toString();
 
   const handleRecordToggle = async () => {
-    // Audio recording will be implemented in Phase 2-3
-    if (isRecording) {
-      setIsRecording(false);
+    if (!audioState.isRecording) {
+      const permission = await requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission required', 'Microphone permission is needed to record lectures.');
+        return;
+      }
+      await audioRecorder.prepareToRecordAsync();
+      audioRecorder.record();
     } else {
-      setIsRecording(true);
+      audioRecorder.stop();
+      setIsProcessing(true);
+      try {
+        const audioUri = audioRecorder.uri;
+        if (!audioUri) throw new Error('Recording failed');
+        
+        // Transcribe
+        const transcript = await transcribeAudio(audioUri, apiKey, language);
+        
+        // Save to DB
+        const noteId = generateId();
+        const newNote: Note = {
+          id: noteId,
+          title: noteTitle || `Lecture ${new Date().toLocaleDateString()}`,
+          sourceType: 'audio',
+          audioUri,
+          transcript,
+          summary: 'Pending...', // AI Summary is Phase 4, set placeholder for now
+          createdAt: new Date().toISOString(),
+          language,
+        };
+        await insertNote(newNote);
+        router.replace(`/note/${noteId}` as any);
+      } catch (error: any) {
+        Alert.alert('Error', error.message || 'Failed to process audio');
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
+
+  const processImage = async (base64Data: string, uri: string) => {
+    setIsProcessing(true);
+    try {
+      const transcript = await extractTextFromImage(base64Data, apiKey, language);
+      
+      const noteId = generateId();
+      const newNote: Note = {
+        id: noteId,
+        title: noteTitle || `Photo Note ${new Date().toLocaleDateString()}`,
+        sourceType: 'image',
+        imageUri: uri,
+        transcript,
+        summary: 'Pending...',
+        createdAt: new Date().toISOString(),
+        language,
+      };
+      await insertNote(newNote);
+      router.replace(`/note/${noteId}` as any);
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Failed to process image');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -44,9 +113,10 @@ export default function CreateNoteScreen() {
       mediaTypes: ['images'],
       allowsEditing: true,
       quality: 0.8,
+      base64: true,
     });
-    if (!result.canceled) {
-      // OCR will be implemented in Phase 4
+    if (!result.canceled && result.assets[0].base64) {
+      await processImage(result.assets[0].base64, result.assets[0].uri);
     }
   };
 
@@ -55,14 +125,14 @@ export default function CreateNoteScreen() {
       mediaTypes: ['images'],
       allowsEditing: true,
       quality: 0.8,
+      base64: true,
     });
-    if (!result.canceled) {
-      // OCR will be implemented in Phase 4
+    if (!result.canceled && result.assets[0].base64) {
+      await processImage(result.assets[0].base64, result.assets[0].uri);
     }
   };
 
   const handleFiles = () => {
-    // Document picker will be added later if needed
     Alert.alert('Coming Soon', 'File upload will be available in a future update.');
   };
 
@@ -107,18 +177,19 @@ export default function CreateNoteScreen() {
         <Card style={styles.recordCard}>
           {/* Mic button */}
           <TouchableOpacity
-            style={[styles.micButton, { borderColor: isRecording ? colors.error : colors.primary }]}
+            style={[styles.micButton, { borderColor: audioState.isRecording ? colors.error : colors.primary }]}
             onPress={handleRecordToggle}
             activeOpacity={0.7}
+            disabled={isProcessing}
           >
             <View
               style={[
                 styles.micInner,
-                { backgroundColor: isRecording ? colors.error : colors.primary },
+                { backgroundColor: audioState.isRecording ? colors.error : colors.primary },
               ]}
             >
               <FontAwesome5
-                name={isRecording ? 'stop' : 'microphone'}
+                name={audioState.isRecording ? 'stop' : 'microphone'}
                 size={28}
                 color={colors.textOnPrimary}
               />
@@ -134,8 +205,8 @@ export default function CreateNoteScreen() {
                   styles.waveBar,
                   {
                     height,
-                    backgroundColor: isRecording ? colors.error : colors.primary,
-                    opacity: isRecording ? 0.8 : 0.5,
+                    backgroundColor: audioState.isRecording ? colors.error : colors.primary,
+                    opacity: audioState.isRecording ? 0.8 : 0.5,
                   },
                 ]}
               />
@@ -144,7 +215,7 @@ export default function CreateNoteScreen() {
 
           {/* Label */}
           <Text style={[styles.recordLabel, { color: colors.textPrimary }]}>
-            {isRecording ? t('createNote.recording') : t('createNote.recordAudio')}
+            {audioState.isRecording ? t('createNote.stopRecording') : t('createNote.recordAudio')}
           </Text>
           <Text style={[styles.recordHint, { color: colors.textSecondary }]}>
             {t('createNote.recordAudioDesc')}
@@ -153,7 +224,10 @@ export default function CreateNoteScreen() {
           {/* Timer */}
           <View style={styles.timerRow}>
             <FontAwesome5 name="clock" size={14} color={colors.textSecondary} />
-            <Text style={[styles.timerText, { color: colors.textSecondary }]}>00:00</Text>
+            <Text style={[styles.timerText, { color: colors.textSecondary }]}>
+              {Math.floor(audioState.durationMillis / 60000).toString().padStart(2, '0')}:
+              {Math.floor((audioState.durationMillis % 60000) / 1000).toString().padStart(2, '0')}
+            </Text>
           </View>
         </Card>
 
@@ -211,6 +285,21 @@ export default function CreateNoteScreen() {
           </View>
         </Card>
       </ScrollView>
+
+      {/* Processing Overlay */}
+      {isProcessing && (
+        <View style={styles.processingOverlay}>
+          <View style={[styles.processingCard, { backgroundColor: colors.surface }]}>
+            <Button loading variant="primary" label="" style={styles.processSpinner} />
+            <Text style={[styles.processingText, { color: colors.textPrimary }]}>
+              {t('createNote.recording')} {/* Re-using label for "Processing..." */}
+            </Text>
+            <Text style={[styles.processingSub, { color: colors.textSecondary }]}>
+              AI is analyzing your input...
+            </Text>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -342,5 +431,37 @@ const styles = StyleSheet.create({
   photoBtnLabel: {
     fontFamily: theme.typography.fontFamily.regular,
     fontSize: 12,
+  },
+  processingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  processingCard: {
+    padding: 32,
+    borderRadius: theme.radius.card,
+    alignItems: 'center',
+    width: '80%',
+  },
+  processSpinner: {
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'transparent',
+    marginBottom: 16,
+  },
+  processingText: {
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: 18,
+    marginBottom: 8,
+  },
+  processingSub: {
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: 14,
+    textAlign: 'center',
   },
 });

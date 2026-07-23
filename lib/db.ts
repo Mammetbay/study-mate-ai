@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { Note } from '../types';
 
 export async function initDB() {
   const db = await SQLite.openDatabaseAsync('studymate.db');
@@ -39,3 +40,33 @@ export async function initDB() {
 }
 
 // Helpers can be added here later (e.g., insertNote, getNotes, etc.)
+export async function insertNote(note: Note) {
+  const db = await SQLite.openDatabaseAsync('studymate.db');
+  await db.runAsync(
+    `INSERT INTO notes (id, title, sourceType, audioUri, imageUri, transcript, summary, createdAt, language) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      note.id,
+      note.title,
+      note.sourceType,
+      note.audioUri || null,
+      note.imageUri || null,
+      note.transcript,
+      note.summary,
+      note.createdAt,
+      note.language,
+    ]
+  );
+}
+
+export async function getNotes(): Promise<Note[]> {
+  const db = await SQLite.openDatabaseAsync('studymate.db');
+  const result = await db.getAllAsync<Note>('SELECT * FROM notes ORDER BY createdAt DESC');
+  return result;
+}
+
+export async function getNoteById(id: string): Promise<Note | null> {
+  const db = await SQLite.openDatabaseAsync('studymate.db');
+  const result = await db.getFirstAsync<Note>('SELECT * FROM notes WHERE id = ?', [id]);
+  return result || null;
+}

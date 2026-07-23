@@ -42,7 +42,7 @@
 | Yerel veri | expo-sqlite | Notlar, quiz'ler, flashcard'lar cihazda saklanır |
 | Ses kaydı | expo-audio | |
 | Transkript (ses) | Groq `whisper-large-v3-turbo` | Ücretsiz tier: günde 2000 istek, kart gerekmez |
-| OCR (fotoğraf) | Groq Vision modeli (ör. `llama-4-scout-17b-16e-instruct`) | Groq'un resmi dokümantasyonunda OCR use-case'i olarak destekleniyor. ⚠️ Build sırasında model adını console.groq.com/docs/vision'dan doğrula — model isimleri zaman zaman değişiyor/deprecate oluyor |
+| OCR (fotoğraf) | Groq `qwen/qwen3.6-27b` (Vision) | Groq Llama vision modelleri deprecate olduğu için OCR işlemi Qwen modeline güncellendi. |
 | Özet + Quiz üretimi | Groq Llama (metin modeli) | Build sırasında console.groq.com/docs/models'dan güncel/aktif model adını doğrula |
 | i18n | react-i18next | Desteklenen diller `config/languages.ts`'den okunur, hardcoded değil |
 | Tema | StyleSheet + theme.ts | NativeWind yok, senin bildiğin yaklaşım |

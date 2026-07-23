@@ -26,3 +26,10 @@ Bu dosya, projenin gelişimini, alınan kararları ve tamamlanan adımları taki
 *   **Ortak UI Bileşenleri:** `Button`, `Card`, `Input`, `EmptyState`, `SectionHeader` ve `SettingsRow` componentleri `DESIGN.md` kurallarına sıkı sıkıya bağlı kalınarak oluşturuldu.
 *   **i18n Genişletmesi:** `en.json` ve `tr.json` dosyaları uygulamadaki tüm UI metinlerini kapsayacak şekilde büyük oranda genişletildi, hardcoded string bırakılmadı.
 *   **Kalıcılık (AsyncStorage):** AppContext güncellenerek Dil, Tema, API Key ve Onboarding tamamlanma durumları `AsyncStorage` ile kalıcı hale getirildi.
+
+## [2026-07-23] - Phase 2 & 3 Tamamlandı (Ses Kaydı ve OCR)
+*   **Groq API Entegrasyonu:** `lib/groq.ts` oluşturuldu. Ses kayıtlarını metne çevirmek için `whisper-large-v3-turbo` entegre edildi. Fotoğraf okuma (OCR) işlemleri için Llama Vision modeli deprecate olduğu için yerine çalışır durumdaki `qwen/qwen3.6-27b` modeli kullanılarak kod güncellendi.
+*   **Veritabanı İşlemleri:** `lib/db.ts` içine not ekleme (`insertNote`), notları listeleme (`getNotes`) ve not detayı getirme (`getNoteById`) yardımcı fonksiyonları eklendi.
+*   **Ses ve Fotoğraf Kaydı:** `app/create-note.tsx` ekranında kurala uygun olarak yeni nesil `expo-audio` paketi kullanılarak ses kayıt altyapısı (başlat, bitir, timer) ve `expo-image-picker` ile fotoğraf çekme/galeri seçme özellikleri eklendi. Alınan ses/fotoğraf verileri Groq'a gönderilerek metne dönüştürülüyor.
+*   **Dinamik Not Listesi:** `app/(tabs)/notes.tsx` güncellenerek statik placeholder yerine SQLite veritabanındaki notların listelendiği, sayfa her açıldığında yenilenen dinamik yapı (FlatList) kuruldu.
+*   **Not Detay Sayfası:** Oluşturulan notu görüntülemek için `app/note/[id].tsx` iskeleti kuruldu.
