@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '../../lib/theme';
 import { useThemeColors } from '../../lib/AppContext';
 import { getNoteById } from '../../lib/db';
+import { useSQLiteContext } from 'expo-sqlite';
 import { Note } from '../../types';
 import { Card } from '../../components/ui/Card';
 
@@ -15,20 +16,30 @@ export default function NoteDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const colors = useThemeColors();
+  const db = useSQLiteContext();
   
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchNote = async () => {
-      if (id) {
-        const data = await getNoteById(id);
-        setNote(data);
+      try {
+        if (id) {
+          const data = await getNoteById(db, id);
+          if (isActive) setNote(data);
+        }
+      } catch (err) {
+        if (isActive) console.error('Failed to load note:', err);
+      } finally {
+        if (isActive) setLoading(false);
       }
-      setLoading(false);
     };
     fetchNote();
-  }, [id]);
+
+    return () => { isActive = false; };
+  }, [id, db]);
 
   if (loading) {
     return (

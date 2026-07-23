@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAudioRecorder, useAudioRecorderState, RecordingPresets, requestRecordingPermissionsAsync } from 'expo-audio';
+import { useSQLiteContext } from 'expo-sqlite';
 import { transcribeAudio, extractTextFromImage } from '../lib/groq';
 import { insertNote } from '../lib/db';
 import { Note } from '../types';
@@ -27,6 +28,7 @@ export default function CreateNoteScreen() {
   const { t } = useTranslation();
   const { apiKey, language } = useAppContext();
   const colors = useThemeColors();
+  const db = useSQLiteContext();
 
   const [noteTitle, setNoteTitle] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -68,10 +70,20 @@ export default function CreateNoteScreen() {
           createdAt: new Date().toISOString(),
           language,
         };
-        await insertNote(newNote);
+        await insertNote(db, newNote);
         router.replace(`/note/${noteId}` as any);
       } catch (error: any) {
-        Alert.alert('Error', error.message || 'Failed to process audio');
+        if (error.message === 'NO_SPEECH_DETECTED') {
+          const errorMsg = language === 'tr'
+            ? 'Ses kaydında anlaşılır bir konuşma tespit edilemedi. Lütfen tekrar kayıt yapmayı deneyin.'
+            : 'No understandable speech was detected in the recording. Please try recording again.';
+          Alert.alert(
+            language === 'tr' ? 'Konuşma Bulunamadı' : 'No Speech Detected',
+            errorMsg
+          );
+        } else {
+          Alert.alert('Error', error.message || 'Failed to process audio');
+        }
       } finally {
         setIsProcessing(false);
       }
@@ -94,10 +106,17 @@ export default function CreateNoteScreen() {
         createdAt: new Date().toISOString(),
         language,
       };
-      await insertNote(newNote);
+      await insertNote(db, newNote);
       router.replace(`/note/${noteId}` as any);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to process image');
+      if (error.message === 'NO_READABLE_TEXT') {
+        const errorMsg = language === 'tr' 
+          ? 'Görselde okunabilir bir metin bulunamadı. Lütfen daha net bir fotoğraf çekmeyi deneyin.'
+          : 'No readable text was found in the image. Please try taking a clearer photo.';
+        Alert.alert('No Text Found', errorMsg);
+      } else {
+        Alert.alert('Error', error.message || 'Failed to process image');
+      }
     } finally {
       setIsProcessing(false);
     }

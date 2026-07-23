@@ -2,6 +2,72 @@ import { LanguageCode } from '../config/languages';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1';
 
+// --- Whisper Types ---
+
+interface WhisperSegment {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+  no_speech_prob: number;
+}
+
+interface WhisperVerboseResponse {
+  text: string;
+  segments: WhisperSegment[];
+  language: string;
+  duration: number;
+}
+
+// --- Whisper Hallucination Patterns ---
+
+const HALLUCINATION_PATTERNS = [
+  'i̇zlediğiniz için teşekkürler',
+  'izlediğiniz için teşekkürler',
+  'abone olmayı unutmayın',
+  'beğenmeyi ve abone olmayı',
+  'bir sonraki videoda görüşmek üzere',
+  'thanks for watching',
+  'thank you for watching',
+  'subtitles by',
+  'subscribe to',
+  'like and subscribe',
+  'please subscribe',
+];
+
+// --- Audio Transcription ---
+
+/**
+ * Validates Whisper transcription output for silence / hallucination.
+ * Throws `NO_SPEECH_DETECTED` when the audio contains no meaningful speech.
+ */
+function validateAudioTranscript(whisperResponse: WhisperVerboseResponse): string {
+  const segments = whisperResponse.segments ?? [];
+  const fullText = whisperResponse.text?.trim() ?? '';
+
+  // 1. Completely empty text
+  if (fullText.length === 0) {
+    throw new Error('NO_SPEECH_DETECTED');
+  }
+
+  // 2. High average no_speech_prob across segments → likely silence/noise
+  if (segments.length > 0) {
+    const avgNoSpeechProb =
+      segments.reduce((sum, s) => sum + (s.no_speech_prob ?? 0), 0) / segments.length;
+    if (avgNoSpeechProb > 0.6) {
+      throw new Error('NO_SPEECH_DETECTED');
+    }
+  }
+
+  // 3. Known Whisper hallucination patterns (common on silent audio)
+  const lowerText = fullText.toLowerCase();
+  if (HALLUCINATION_PATTERNS.some((p) => lowerText.includes(p))) {
+    throw new Error('NO_SPEECH_DETECTED');
+  }
+
+  return fullText;
+}
+
 export async function transcribeAudio(
   audioUri: string,
   apiKey: string,
@@ -13,24 +79,28 @@ export async function transcribeAudio(
 
   const formData = new FormData();
 
+  const filename = audioUri.split('/').pop() || 'recording.m4a';
+  const match = /\.(\w+)$/.exec(filename);
+  const ext = match ? match[1].toLowerCase() : 'm4a';
+  const mimeType = ext === 'wav' ? 'audio/wav' : ext === 'mp3' ? 'audio/mp3' : ext === 'm4a' ? 'audio/m4a' : 'audio/m4a';
+
   // React Native FormData requires specific formatting for files
   const file = {
     uri: audioUri,
-    type: 'audio/m4a',
-    name: 'recording.m4a',
+    type: mimeType,
+    name: filename.includes('.') ? filename : `${filename}.${ext}`,
   };
 
   formData.append('file', file as any);
   formData.append('model', 'whisper-large-v3-turbo');
   formData.append('language', language);
-  formData.append('response_format', 'text');
+  formData.append('response_format', 'verbose_json');
 
   try {
     const response = await fetch(`${GROQ_API_URL}/audio/transcriptions`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'multipart/form-data',
       },
       body: formData,
     });
@@ -41,12 +111,68 @@ export async function transcribeAudio(
       throw new Error(`Groq API Error: ${response.status} - ${errorText}`);
     }
 
-    const text = await response.text();
-    return text.trim();
+    const data: WhisperVerboseResponse = await response.json();
+    return validateAudioTranscript(data);
   } catch (error) {
     console.error('transcribeAudio error:', error);
     throw error;
   }
+}
+
+// --- Vision / OCR ---
+
+const SYSTEM_PROMPT_TR =
+  'Sen bir OCR/metin çıkarma asistanısın. Görevin SADECE görseldeki (fotoğraf veya doküman/sayfa taraması) okunabilir metni birebir çıkarmak.\n\n' +
+  'KURALLAR:\n' +
+  '- Sadece çıkarılan metni döndür. Hiçbir açıklama, yorum, giriş cümlesi veya meta-metin ekleme.\n' +
+  '- <think> etiketi veya herhangi bir muhakeme/düşünce süreci gösterme.\n' +
+  '- Eğer görselde/dokümanda okunabilir bir metin/yazı YOKSA, tam olarak şu tek satırı döndür: "NO_TEXT_FOUND"\n' +
+  '- Eğer görsel bulanık/anlaşılmazsa ve metin çıkarılamıyorsa, yine "NO_TEXT_FOUND" döndür.\n' +
+  '- Asla "görselde metin yok" gibi cümleler kurma, sadece "NO_TEXT_FOUND" kodunu kullan.';
+
+const SYSTEM_PROMPT_EN =
+  'You are an OCR/text extraction assistant. Your task is ONLY to extract readable text exactly as it appears in the image.\n\n' +
+  'RULES:\n' +
+  '- Only return the extracted text. Do not add any explanations, comments, introductory phrases, or meta-text.\n' +
+  '- Do not include <think> tags or show any reasoning/thought process.\n' +
+  '- If there is NO readable text/writing in the image, return exactly this single line: "NO_TEXT_FOUND"\n' +
+  '- If the image is blurry/illegible and text cannot be extracted, also return "NO_TEXT_FOUND".\n' +
+  '- Never use sentences like "there is no text", just use the "NO_TEXT_FOUND" code.';
+
+const NO_TEXT_INDICATORS = [
+  'NO_TEXT_FOUND',
+  'metin yok',
+  'okunabilir bir metin',
+  'boş bir sayfa',
+  'herhangi bir yazı',
+  'no text',
+  'no readable text',
+  'there is no text',
+];
+
+/**
+ * Cleans and validates the raw Vision model response.
+ * Strips `<think>` blocks, markdown meta-comments, and checks for "no text" indicators.
+ * Throws `NO_READABLE_TEXT` when the image contains no extractable text.
+ */
+function cleanAndValidateExtractedText(rawResponse: string): string {
+  // 1. Remove all <think>...</think> blocks (fallback if model disobeys)
+  let cleaned = rawResponse.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+  // 2. Remove markdown bold meta-comments like **Sonuç:** or **Result:**
+  cleaned = cleaned.replace(/\*\*.*?\*\*/g, '').trim();
+
+  // 3. Check for "no text" indicators
+  const lowerCleaned = cleaned.toLowerCase();
+  const isEmpty =
+    cleaned.length === 0 ||
+    NO_TEXT_INDICATORS.some((indicator) => lowerCleaned.includes(indicator.toLowerCase()));
+
+  if (isEmpty) {
+    throw new Error('NO_READABLE_TEXT');
+  }
+
+  return cleaned;
 }
 
 export async function extractTextFromImage(
@@ -58,19 +184,26 @@ export async function extractTextFromImage(
     throw new Error('Groq API Key is not set');
   }
 
-  const languagePrompt = language === 'tr'
-    ? 'Lütfen bu görseldeki tüm metni çıkar ve bana Türkçe olarak ver.'
-    : 'Please extract all the text from this image and provide it to me.';
+  const systemPrompt = language === 'tr' ? SYSTEM_PROMPT_TR : SYSTEM_PROMPT_EN;
+
+  const userPrompt =
+    language === 'tr'
+      ? 'Lütfen bu görseldeki tüm metni çıkar ve bana Türkçe olarak ver.'
+      : 'Please extract all the text from this image and provide it to me.';
 
   const payload = {
-    model: "qwen/qwen3.6-27b",
+    model: 'qwen/qwen3.6-27b',
     messages: [
+      {
+        role: 'system',
+        content: systemPrompt,
+      },
       {
         role: 'user',
         content: [
           {
             type: 'text',
-            text: languagePrompt,
+            text: userPrompt,
           },
           {
             type: 'image_url',
@@ -102,7 +235,9 @@ export async function extractTextFromImage(
     }
 
     const data = await response.json();
-    return data.choices[0].message.content.trim();
+    const rawContent: string = data.choices[0].message.content || '';
+
+    return cleanAndValidateExtractedText(rawContent);
   } catch (error) {
     console.error('extractTextFromImage error:', error);
     throw error;

@@ -9,12 +9,14 @@ import { useThemeColors } from '../../lib/AppContext';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Card } from '../../components/ui/Card';
 import { getNotes } from '../../lib/db';
+import { useSQLiteContext } from 'expo-sqlite';
 import { Note } from '../../types';
 
 export default function NotesScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const colors = useThemeColors();
+  const db = useSQLiteContext();
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ export default function NotesScreen() {
       let isActive = true;
       const fetchNotes = async () => {
         try {
-          const data = await getNotes();
+          const data = await getNotes(db);
           if (isActive) {
             setNotes(data);
           }
