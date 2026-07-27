@@ -1,5 +1,6 @@
 import { FontAwesome5 } from '@expo/vector-icons';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -10,11 +11,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useSQLiteContext } from 'expo-sqlite';
 import { Card } from '../../components/ui/Card';
 import { useAppContext, useThemeColors } from '../../lib/AppContext';
-import { theme } from '../../lib/theme';
 import { getNotes } from '../../lib/db';
+import { theme } from '../../lib/theme';
 import { Note } from '../../types';
 
 const RECENT_LIMIT = 3;
@@ -100,11 +100,6 @@ export default function HomeScreen() {
               {t('home.userName')}
             </Text>
           </View>
-          <TouchableOpacity
-            style={[styles.notifButton, { backgroundColor: colors.surface }]}
-          >
-            <FontAwesome5 name="bell" size={18} color={colors.textSecondary} />
-          </TouchableOpacity>
         </View>
 
         {/* Stats row */}

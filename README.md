@@ -1,50 +1,92 @@
-# Welcome to your Expo app 👋
+# StudyMate AI 📚
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An AI-powered study companion built with **React Native + Expo**. Record a
+lecture or snap a photo of your notes, and StudyMate AI automatically produces a
+**transcript, summary, multiple-choice quiz, and flashcards** — all stored
+locally on the device.
 
-## Get started
+This is a **client-only, sellable code template** (no backend, no accounts, no
+billing). The buyer plugs in their own AI provider key, rebrands it, and ships.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## ✨ Features
 
-2. Start the app
+- 🎙️ **Audio lectures** — record with `expo-audio`, auto-transcribe (STT model)
+- 📷 **Photo notes** — capture/upload a photo, extract text via OCR (vision model)
+- 📝 **Auto summary** — concise summary of each note (chat model)
+- ❓ **Auto quiz** — generated multiple-choice questions with scoring
+- 🃏 **Flashcards** — flip cards with **spaced repetition** (SM-2-lite)
+- 🏷️ **Smart tags** — AI labels each note with 1–5 keywords for filtering
+- 🔎 **Search & filter** — notes by title, quizzes by name, notes by tag
+- 📊 **Home dashboard** — streak, total notes, editable weekly goal, recent notes
+- 🌐 **i18n** — Turkish & English, fully translated (`config/languages.ts`)
+- 🌗 **Light / dark theme**
+- 🔌 **Multi-provider AI** — Groq, OpenAI, Google Gemini, OpenRouter (adapter based)
 
-   ```bash
-   npx expo start
-   ```
+## 🧱 Tech Stack
 
-In the output, you'll find options to open the app in a
+| Layer | Choice |
+|---|---|
+| Framework | React Native + Expo + Expo Router |
+| Language | TypeScript (strict) |
+| State | Context API (no Redux/Zustand) |
+| Local data | `expo-sqlite` (versioned migrations) |
+| Styling | `StyleSheet` + `lib/theme.ts` (no Tailwind/NativeWind) |
+| i18n | `react-i18next` |
+| Audio | `expo-audio` (not the legacy `expo-av`) |
+| AI | Adapter architecture — `lib/ai/` + `config/providers.ts` |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## 🚀 Get Started
 
 ```bash
-npm run reset-project
+npm install
+npx expo start        # then press i (iOS), a (Android), or scan the QR in Expo Go
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+```bash
+npx expo start --ios
+npx expo start --android
+npx tsc --noEmit      # typecheck
+```
 
-## Learn more
+> First launch shows a 3-slide onboarding. To use AI features, open
+> **Settings → AI Provider**, pick a provider, paste your API key, and choose a
+> model per capability (STT / Vision / Chat).
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🔑 API Keys
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+No `.env` key is required. Each user enters their own provider key inside the app
+(**Settings**) and it is stored on-device via `AsyncStorage` — **never hardcoded**.
 
-## Join the community
+Get a key from your chosen provider:
 
-Join our community of developers creating universal apps.
+- **Groq** — https://console.groq.com/keys (free tier, no card)
+- **OpenAI** — https://platform.openai.com/api-keys
+- **Google Gemini** — https://aistudio.google.com/app/apikey
+- **OpenRouter** — https://openrouter.ai/keys (model list is public)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Model lists are fetched **live** from each provider's API at runtime — nothing is
+hardcoded. See [`docs/SETUP.md`](docs/SETUP.md) for the full setup & rebrand guide.
+
+## 📁 Project Structure
+
+```
+app/            # Expo Router screens (tabs, create-note, note, quiz, flashcard, weekly-goal)
+components/     # ui/ (Button, Input, Card…) + study/ (AudioPlayerCard)
+lib/            # ai/ (service, providers, prompts), db.ts, spacedRepetition.ts, theme.ts, AppContext.tsx
+config/         # languages.ts, providers.ts, about.ts (single sources of truth)
+locales/        # tr.json, en.json
+types/          # index.ts (Note, QuizQuestion, Flashcard), ai.ts
+docs/           # studymate-ai-scope.md (source of truth), SETUP.md
+```
+
+## 📖 Documentation
+
+- [`docs/SETUP.md`](docs/SETUP.md) — install, configure & rebrand guide
+- [`docs/studymate-ai-scope.md`](docs/studymate-ai-scope.md) — full scope & architecture (source of truth)
+- [`AGENTS.md`](AGENTS.md) — conventions for AI coding agents
+
+## 📄 License
+
+Sold as a code template. See your marketplace purchase terms for usage rights.

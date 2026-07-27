@@ -1,24 +1,24 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { FontAwesome5 } from '@expo/vector-icons';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
   ActivityIndicator,
-  TextInput,
+  FlatList,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { theme } from '../../lib/theme';
-import { useThemeColors } from '../../lib/AppContext';
-import { EmptyState } from '../../components/ui/EmptyState';
 import { Card } from '../../components/ui/Card';
-import { getNotes, getAllTags } from '../../lib/db';
-import { useSQLiteContext } from 'expo-sqlite';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { useThemeColors } from '../../lib/AppContext';
+import { getAllTags, getNotes } from '../../lib/db';
+import { theme } from '../../lib/theme';
 import { Note } from '../../types';
 
 const ALL_TAGS = '__all__';
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 16,
     right: 20,
     width: 56,
     height: 56,

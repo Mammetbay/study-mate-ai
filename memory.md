@@ -132,3 +132,18 @@ Commit edilmemiş tüm çalışma dizini değişiklikleri gözden geçirildi; he
     *   **v4** — deprecated `category` kolonu `notes`'tan **DÜŞÜRÜLDÜ** (`dropColumnIfExists`). (Önceki kayıt "category kolonu geri uyum için kaldı" diyordu — artık geçerli değil; kolon tamamen kaldırıldı.)
 *   Base `CREATE TABLE IF NOT EXISTS` şeması taze kurulumlara tüm kolonları (tags + SR alanları) doğrudan verir; versiyonlu ALTER'lar yalnızca eski DB'ler için.
 *   Diğer tüm working-tree değişiklikleri (AI provider mimarisi, tags/oto-başlık, spaced repetition, home dashboard, weekly-goal, quiz arama, ses kaydı fix, not detay medya, about linkleri, `expo-document-picker`) bu dosyadaki önceki kayıtlarla birebir örtüşüyor — ek kayıt gerekmedi.
+
+## [2026-07-28] - Codester Teslim Dokümanları Yazıldı (README, SETUP, .env.example)
+scope §8'deki bayat/eksik teslim dosyaları çoklu-sağlayıcı gerçeğine göre yazıldı.
+
+*   **`.env.example`** — eskiden yalnızca `EXPO_PUBLIC_GROQ_API_KEY` içeriyordu (yanlıştı; kodda hiç `process.env`/`EXPO_PUBLIC` kullanımı YOK). Artık "API key gerektirmez, key'ler uygulama içi ayarlardan girilir" açıklaması içeren placeholder.
+*   **`README.md`** — varsayılan `create-expo-app` boilerplate'i tamamen değiştirildi; projeye özel (özellikler, tech stack, çalıştırma, per-provider key alma linkleri, klasör yapısı). İngilizce (uluslararası Codester alıcısı için).
+*   **`docs/SETUP.md` (YENİ)** — kurulum + AI sağlayıcı yapılandırma + rebrand kılavuzu (app.json, theme, locales, `config/about.ts`, `config/languages.ts`, `config/providers.ts`), SQLite/AsyncStorage notu, EAS build, troubleshooting. AGENTS.md ve scope bu dosyaya referans veriyordu ama dosya yoktu — artık var.
+
+> Kalan Codester §8 kalemleri (kod-dışı, elle üretilecek): gerçek cihaz ekran görüntüleri (min. 5-6), demo GIF/video, Codester listing metni, icon/font ticari lisans kontrolü. İşlevsel/kod backlog'u boş.
+
+## [2026-07-28] - Weekly Goal Stepper Fix (grid snapping + klavye girişi)
+`app/weekly-goal.tsx` küçük UX hatası düzeltildi.
+
+*   **Grid snapping:** `STEP=5` olduğu için 1'den +5 → 6 (grid dışı) oluyordu. Artık increment `(Math.floor(v/STEP)+1)*STEP`, decrement `(Math.ceil(v/STEP)-1)*STEP` ile temiz katlara oturuyor (1→5→10…, 6→5). MIN=1 clamp korunuyor (5'ten decrement → 1).
+*   **Klavye girişi:** Büyük sayıya dokununca (`TouchableOpacity`) `TextInput`'e dönüşüyor (`number-pad`, autoFocus, selectTextOnFocus, maxLength 3, sadece rakam). `onBlur`/`onSubmitEditing` → parse + clamp(1-200), geçersizse eski değere döner. Yeni i18n metni yok. `tsc --noEmit` temiz.

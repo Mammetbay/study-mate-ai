@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -20,10 +20,29 @@ export default function WeeklyGoalScreen() {
   const { weeklyGoal, setWeeklyGoal } = useAppContext();
 
   const [value, setValue] = useState<number>(weeklyGoal);
+  const [editing, setEditing] = useState<boolean>(false);
+  const [draft, setDraft] = useState<string>('');
 
   const clamp = (n: number) => Math.min(MAX_GOAL, Math.max(MIN_GOAL, n));
-  const decrement = () => setValue((v) => clamp(v - STEP));
-  const increment = () => setValue((v) => clamp(v + STEP));
+
+  // Snap to the STEP grid so off-grid values (e.g. 1) still land on clean
+  // multiples: 1 -> 5 -> 10 … and 6 -> 5 on the way down.
+  const decrement = () => setValue((v) => clamp((Math.ceil(v / STEP) - 1) * STEP));
+  const increment = () => setValue((v) => clamp((Math.floor(v / STEP) + 1) * STEP));
+
+  const startEditing = () => {
+    setDraft(String(value));
+    setEditing(true);
+  };
+
+  // Commit typed input: keep the clamped number if valid, otherwise revert.
+  const commitEditing = () => {
+    const parsed = parseInt(draft, 10);
+    if (Number.isFinite(parsed)) {
+      setValue(clamp(parsed));
+    }
+    setEditing(false);
+  };
 
   const handleSave = () => {
     setWeeklyGoal(clamp(value));
@@ -62,7 +81,24 @@ export default function WeeklyGoalScreen() {
             </TouchableOpacity>
 
             <View style={styles.valueBox}>
-              <Text style={[styles.valueNumber, { color: colors.textPrimary }]}>{value}</Text>
+              {editing ? (
+                <TextInput
+                  style={[styles.valueNumber, styles.valueInput, { color: colors.textPrimary }]}
+                  value={draft}
+                  onChangeText={(text) => setDraft(text.replace(/[^0-9]/g, ''))}
+                  onBlur={commitEditing}
+                  onSubmitEditing={commitEditing}
+                  keyboardType="number-pad"
+                  returnKeyType="done"
+                  maxLength={3}
+                  autoFocus
+                  selectTextOnFocus
+                />
+              ) : (
+                <TouchableOpacity onPress={startEditing} activeOpacity={0.7}>
+                  <Text style={[styles.valueNumber, { color: colors.textPrimary }]}>{value}</Text>
+                </TouchableOpacity>
+              )}
               <Text style={[styles.valueUnit, { color: colors.textSecondary }]}>
                 {t('weeklyGoal.perWeek')}
               </Text>
@@ -138,6 +174,11 @@ const styles = StyleSheet.create({
   valueNumber: {
     fontFamily: theme.typography.fontFamily.bold,
     fontSize: 48,
+  },
+  valueInput: {
+    minWidth: 100,
+    textAlign: 'center',
+    padding: 0,
   },
   valueUnit: {
     fontFamily: theme.typography.fontFamily.regular,
