@@ -271,3 +271,184 @@ export async function extractTextFromImage(
     throw error;
   }
 }
+
+// --- Summary & Quiz Generation ---
+
+export async function generateSummary(
+  transcript: string,
+  apiKey: string,
+  language: LanguageCode
+): Promise<string> {
+  if (!apiKey) {
+    throw new Error('Groq API Key is not set');
+  }
+
+  const systemPrompt =
+    language === 'tr'
+      ? 'Sen bir ders asistanısın. Görevin verilen ders transkriptini/notunu analiz etmek ve 3-5 maddeden oluşan anlaşılır, net bir özet çıkarmaktır.\n\nKURALLAR:\n- Sadece özeti ver. Giriş, açıklama veya meta-metin yazma.\n- Maddeleri "• " ile başlat.\n- <think> etiketi kullanma.'
+      : 'You are a study assistant. Your task is to analyze the provided lecture transcript/note and produce a clear, concise bulleted summary (3-5 bullet points).\n\nRULES:\n- Only return the summary points. Do not include intros or meta text.\n- Use "• " for bullet points.\n- Do not use <think> tags.';
+
+  const payload = {
+    model: 'qwen/qwen3.6-27b',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `Ders Metni:\n${transcript}` },
+    ],
+    temperature: 0.3,
+    max_tokens: 1024,
+  };
+
+  try {
+    const response = await fetch(`${GROQ_API_URL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Groq Summary Error:', errorText);
+      throw new Error(`Groq API Error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    let content: string = data.choices[0]?.message?.content || '';
+    content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    return content;
+  } catch (error) {
+    console.error('generateSummary error:', error);
+    throw error;
+  }
+}
+
+export async function generateQuiz(
+  noteId: string,
+  transcript: string,
+  apiKey: string,
+  language: LanguageCode
+): Promise<import('../types').QuizQuestion[]> {
+  if (!apiKey) {
+    throw new Error('Groq API Key is not set');
+  }
+
+  const systemPrompt =
+    language === 'tr'
+      ? 'Sen bir eğitim/quiz hazırlama asistanısın. Görevin verilen ders metninden 3 ile 5 adet çoktan seçmeli soru hazırlamaktır.\n\nÇIKTI FORMATI:\nSadece ve sadece geçerli bir JSON dizisi döndür. Başka HİÇBİR açıklama veya metin ekleme.\nÖrnek:\n[\n  {\n    "question": "Soru metni?",\n    "options": ["Şık A", "Şık B", "Şık C", "Şık D"],\n    "correctIndex": 0\n  }\n]'
+      : 'You are an educational quiz creation assistant. Create 3 to 5 multiple-choice questions based on the provided lecture note.\n\nOUTPUT FORMAT:\nReturn ONLY a valid JSON array. No explanations or extra text.\nExample:\n[\n  {\n    "question": "Question text?",\n    "options": ["Option A", "Option B", "Option C", "Option D"],\n    "correctIndex": 0\n  }\n]';
+
+  const payload = {
+    model: 'qwen/qwen3.6-27b',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `Ders Metni:\n${transcript}` },
+    ],
+    temperature: 0.2,
+    max_tokens: 2048,
+  };
+
+  try {
+    const response = await fetch(`${GROQ_API_URL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Groq Quiz Error:', errorText);
+      throw new Error(`Groq API Error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    let content: string = data.choices[0]?.message?.content || '';
+    content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      throw new Error('INVALID_QUIZ_JSON');
+    }
+
+    const parsedArray = JSON.parse(jsonMatch[0]);
+    return parsedArray.map((q: any, index: number) => ({
+      id: `${noteId}-quiz-${index}-${Date.now()}`,
+      noteId,
+      question: q.question,
+      options: Array.isArray(q.options) ? q.options : [],
+      correctIndex: typeof q.correctIndex === 'number' ? q.correctIndex : 0,
+    }));
+  } catch (error) {
+    console.error('generateQuiz error:', error);
+    throw error;
+  }
+}
+
+export async function generateFlashcards(
+  noteId: string,
+  transcript: string,
+  apiKey: string,
+  language: LanguageCode
+): Promise<import('../types').Flashcard[]> {
+  if (!apiKey) {
+    throw new Error('Groq API Key is not set');
+  }
+
+  const systemPrompt =
+    language === 'tr'
+      ? 'Sen bir eğitim flashcard asistanısın. Görevin verilen ders metninden 6 ile 12 adet flashcard üretmektir.\n\nÇIKTI FORMATI:\nSadece ve sadece geçerli bir JSON dizisi döndür. Başka HİÇBİR açıklama veya metin ekleme.\nÖrnek:\n[\n  {\n    "front": "Soru veya terim",\n    "back": "Kısa cevap veya tanım"\n  }\n]\n\nKURALLAR:\n- front: soru, terim veya kavram\n- back: net, kısa cevap\n- <think> etiketi kullanma.'
+      : 'You are an educational flashcard assistant. Create 6 to 12 flashcards from the provided lecture note.\n\nOUTPUT FORMAT:\nReturn ONLY a valid JSON array. No explanations or extra text.\nExample:\n[\n  {\n    "front": "Question or term",\n    "back": "Short answer or definition"\n  }\n]\n\nRULES:\n- front: question, term, or concept\n- back: clear, concise answer\n- Do not use <think> tags.';
+
+  const payload = {
+    model: 'qwen/qwen3.6-27b',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `Ders Metni:\n${transcript}` },
+    ],
+    temperature: 0.2,
+    max_tokens: 2048,
+  };
+
+  try {
+    const response = await fetch(`${GROQ_API_URL}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Groq Flashcards Error:', errorText);
+      throw new Error(`Groq API Error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    let content: string = data.choices[0]?.message?.content || '';
+    content = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      throw new Error('INVALID_FLASHCARD_JSON');
+    }
+
+    const parsedArray = JSON.parse(jsonMatch[0]) as Array<{ front?: string; back?: string }>;
+    return parsedArray
+      .filter((card) => typeof card.front === 'string' && typeof card.back === 'string')
+      .map((card, index) => ({
+        id: `${noteId}-fc-${index}-${Date.now()}`,
+        noteId,
+        front: card.front as string,
+        back: card.back as string,
+      }));
+  } catch (error) {
+    console.error('generateFlashcards error:', error);
+    throw error;
+  }
+}

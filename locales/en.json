@@ -11,7 +11,11 @@
     "or": "or",
     "seeAll": "See all",
     "getStarted": "Get Started",
-    "done": "Done"
+    "done": "Done",
+    "error": "Error",
+    "unknownError": "Something went wrong. Please try again.",
+    "apiKeyRequired": "API Key Required",
+    "apiKeyRequiredMessage": "Please set your Groq API key in Settings first."
   },
   "tabs": {
     "home": "Home",
@@ -71,23 +75,46 @@
     "questionOf": "Question {{current}} of {{total}}",
     "nextQuestion": "Next Question",
     "generateQuiz": "Generate Quiz",
-    "generateFlashcards": "Generate Flashcards"
+    "generateFlashcards": "Generate Flashcards",
+    "scoreTitle": "Quiz Completed!",
+    "yourScore": "Your Score: {{score}}%",
+    "correctAnswers": "{{correct}} of {{total}} questions correct",
+    "retry": "Try Again",
+    "backToNotes": "Back to Notes",
+    "questionsCount": "{{count}} Questions",
+    "startQuiz": "Start Quiz",
+    "noQuizFound": "No quiz found for this note."
   },
   "flashcards": {
     "title": "Flashcards",
     "front": "FRONT",
+    "back": "BACK",
+    "definition": "DEFINITION",
+    "answer": "ANSWER",
     "tapToFlip": "Tap to flip",
     "answerHidden": "Answer hidden — tap card to reveal",
     "previous": "Previous",
     "known": "Known",
     "missed": "Missed",
-    "remaining": "Remaining"
+    "remaining": "Remaining",
+    "noneFound": "No flashcards found for this note."
   },
   "noteDetail": {
     "summary": "Summary",
     "transcript": "Transcript",
     "aiSummary": "AI SUMMARY",
-    "keyPoints": "KEY POINTS"
+    "keyPoints": "KEY POINTS",
+    "generateSummary": "Generate Summary",
+    "generatingSummary": "Generating Summary...",
+    "summaryEmpty": "No summary generated yet.",
+    "generateQuiz": "Generate Quiz",
+    "generatingQuiz": "Generating Quiz...",
+    "solveQuiz": "Solve Quiz",
+    "quizQuestionsCount": "{{count}} Questions Ready",
+    "generateFlashcards": "Generate Flashcards",
+    "generatingFlashcards": "Generating Flashcards...",
+    "openFlashcards": "Open Flashcards",
+    "notFound": "Note not found"
   },
   "settings": {
     "title": "Settings",

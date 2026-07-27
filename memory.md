@@ -43,3 +43,11 @@ Bu dosya, projenin gelişimini, alınan kararları ve tamamlanan adımları taki
     *   `prompt` alanına ders/sınıf konuşması bağlamı eklenerek YouTube altyazı kalıpları engellendi.
     *   `normalizeText` fonksiyonu yazılarak Türkçe özel karakterler ve uzantılar için bağışık arama sağlandı.
     *   `avgNoSpeechProb > 0.4` ve `maxNoSpeechProb > 0.7` eşik değerleri ile `HALLUCINATION_TRIGGERS` süzgeci entegre edildi. Sessiz ve uydurma kayıtlar veritabanına yazılmadan `NO_SPEECH_DETECTED` hatası verilecek şekilde UI uyarısı sağlandı.
+
+## [2026-07-24] - Phase 4 Tamamlandı + Flashcard Modu
+*   **Quiz sekmesi:** `app/(tabs)/quiz.tsx` SQLite `getNotesWithQuizzes` ile dolduruldu; kart tıklanınca `/quiz/[id]` açılıyor.
+*   **Quiz player UI:** `QuizScreen.png` referansına göre A–D şıklar, teal progress %, doğru/yanlış border + ikon, **Next Question** CTA eklendi.
+*   **Not detay UI:** `NoteDetail.png` referansına göre Summary | Transcript sekmeleri, AI özet kartı (teal bullet), altta Generate Quiz / Generate Flashcards CTA’ları.
+*   **Flashcard pipeline:** `generateFlashcards` (Groq Qwen), `insertFlashcards` / `getFlashcardsByNoteId` / `updateFlashcardReview` DB helpers.
+*   **Flashcard ekranı:** `app/flashcard/[id].tsx` — `FlashcardScreen.png` uyumlu flip, segment progress, known/missed, Previous/Next, Known/Missed/Remaining istatistikleri.
+*   **i18n:** `common.apiKeyRequired*`, quiz/flashcard/noteDetail eksik anahtarları `en.json` / `tr.json` içine eklendi.

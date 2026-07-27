@@ -11,7 +11,11 @@
     "or": "veya",
     "seeAll": "Tümünü gör",
     "getStarted": "Başla",
-    "done": "Tamam"
+    "done": "Tamam",
+    "error": "Hata",
+    "unknownError": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+    "apiKeyRequired": "API Anahtarı Gerekli",
+    "apiKeyRequiredMessage": "Lütfen önce Ayarlar'dan Groq API anahtarınızı girin."
   },
   "tabs": {
     "home": "Ana Sayfa",
@@ -71,23 +75,46 @@
     "questionOf": "Soru {{current}} / {{total}}",
     "nextQuestion": "Sonraki Soru",
     "generateQuiz": "Quiz Oluştur",
-    "generateFlashcards": "Flashcard Oluştur"
+    "generateFlashcards": "Flashcard Oluştur",
+    "scoreTitle": "Quiz Tamamlandı!",
+    "yourScore": "Skorunuz: %{{score}}",
+    "correctAnswers": "{{total}} sorudan {{correct}} tanesi doğru",
+    "retry": "Tekrar Çöz",
+    "backToNotes": "Notlara Dön",
+    "questionsCount": "{{count}} Soru",
+    "startQuiz": "Quiz'e Başla",
+    "noQuizFound": "Bu not için quiz bulunamadı."
   },
   "flashcards": {
     "title": "Flashcard'lar",
     "front": "ÖN",
+    "back": "ARKA",
+    "definition": "TANIM",
+    "answer": "CEVAP",
     "tapToFlip": "Çevirmek için dokun",
     "answerHidden": "Cevap gizli — görmek için karta dokun",
     "previous": "Önceki",
     "known": "Bilinen",
     "missed": "Kaçırılan",
-    "remaining": "Kalan"
+    "remaining": "Kalan",
+    "noneFound": "Bu not için flashcard bulunamadı."
   },
   "noteDetail": {
     "summary": "Özet",
     "transcript": "Transkript",
     "aiSummary": "AI ÖZETİ",
-    "keyPoints": "ÖNEMLİ NOKTALAR"
+    "keyPoints": "ÖNEMLİ NOKTALAR",
+    "generateSummary": "Özet Üret",
+    "generatingSummary": "Özet Üretiliyor...",
+    "summaryEmpty": "Henüz özet üretilmedi.",
+    "generateQuiz": "Quiz Oluştur",
+    "generatingQuiz": "Quiz Oluşturuluyor...",
+    "solveQuiz": "Quiz'i Çöz",
+    "quizQuestionsCount": "{{count}} Soru Hazır",
+    "generateFlashcards": "Flashcard Oluştur",
+    "generatingFlashcards": "Flashcard Oluşturuluyor...",
+    "openFlashcards": "Flashcard'ları Aç",
+    "notFound": "Not bulunamadı"
   },
   "settings": {
     "title": "Ayarlar",
