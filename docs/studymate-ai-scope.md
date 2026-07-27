@@ -6,7 +6,7 @@
 
 **Kimin için (Codester alıcısı):** Kendi eğitim/öğrenci odaklı mobil uygulamasını hızlıca kurmak isteyen indie geliştiriciler, ed-tech ajansları, özel ders/kurs işletmeleri.
 
-**Bu bir SaaS DEĞİL:** Alıcı ürünü satın alır, kendi Groq API key'ini `.env` dosyasına ekler, kendi markasıyla yayınlar. Backend, kullanıcı yönetimi, billing sistemi bu üründe yok — bilinçli olarak yok.
+**Bu bir SaaS DEĞİL:** Alıcı ürünü satın alır, kullanıcı seçtiği AI sağlayıcının (Groq/OpenAI/Gemini/OpenRouter) API key'ini uygulama içi ayarlardan girer, kendi markasıyla yayınlar. Backend, kullanıcı yönetimi, billing sistemi bu üründe yok — bilinçli olarak yok.
 
 ---
 
@@ -14,9 +14,9 @@
 
 ### Dahil (MVP)
 - Sesli ders kaydı (expo-audio)
-- **Fotoğraf çekerek veya galeriden yükleyerek not oluşturma** (defter/slayt fotoğrafından metin çıkarma — Groq Vision/OCR)
-- Otomatik transkript (Groq Whisper — ses için) / OCR (Groq Vision — fotoğraf için)
-- Otomatik özet (Groq Llama)
+- **Fotoğraf çekerek veya galeriden yükleyerek not oluşturma** (defter/slayt fotoğrafından metin çıkarma — vision modeli/OCR)
+- Otomatik transkript (stt modeli — ses için) / OCR (vision modeli — fotoğraf için)
+- Otomatik özet (chat modeli)
 - Otomatik çoktan seçmeli quiz üretimi
 - Flashcard modu (spaced repetition mantığı basit versiyon)
 - Not listesi + arama/kategori
@@ -41,12 +41,13 @@
 | State | Context API | Redux/Zustand gereksiz bu boyutta |
 | Yerel veri | expo-sqlite | Notlar, quiz'ler, flashcard'lar cihazda saklanır |
 | Ses kaydı | expo-audio | |
-| Transkript (ses) | Groq `whisper-large-v3-turbo` | Ücretsiz tier: günde 2000 istek, kart gerekmez |
-| OCR (fotoğraf) | Groq `qwen/qwen3.6-27b` (Vision) | Groq Llama vision modelleri deprecate olduğu için OCR işlemi Qwen modeline güncellendi. |
-| Özet + Quiz üretimi | Groq Llama (metin modeli) | Build sırasında console.groq.com/docs/models'dan güncel/aktif model adını doğrula |
+| AI sağlayıcı | Çoklu (Groq, OpenAI, Gemini, OpenRouter) | Adapter mimarisi, `config/providers.ts` + `lib/ai/`. Kullanıcı ayarlardan sağlayıcı + model seçer |
+| Transkript (ses) | Sağlayıcının `stt` yetenekli modeli | Model listesi runtime'da API'den çekilir, hardcode değil |
+| OCR (fotoğraf) | Sağlayıcının `vision` yetenekli modeli | `lib/ai/service.ts` → `extractTextFromImage` |
+| Özet + Quiz + Flashcard | Sağlayıcının `chat` yetenekli modeli | `lib/ai/service.ts` → `generateSummary/generateQuiz/generateFlashcards` |
 | i18n | react-i18next | Desteklenen diller `config/languages.ts`'den okunur, hardcoded değil |
 | Tema | StyleSheet + theme.ts | NativeWind yok, senin bildiğin yaklaşım |
-| API key yönetimi | `.env` + config dosyası | Alıcı kendi key'ini girer, kodda hardcoded key YOK |
+| API key yönetimi | Uygulama içi ayarlar (sağlayıcı başına) | Kullanıcı seçtiği sağlayıcının key'ini ayarlardan girer, cihazda saklanır; kodda hardcoded key YOK |
 
 ### Dil Sistemi (Language System)
 
@@ -71,30 +72,42 @@ export const LANGUAGE_LABELS: Record<LanguageCode, string> = {
 
 ```
 studymate-ai/
-├── app/                    # Expo Router sayfaları
-│   ├── (onboarding)/
+├── app/                     # Expo Router sayfaları
+│   ├── (onboarding)/         # 3 slide onboarding
 │   ├── (tabs)/
-│   │   ├── notes.tsx
-│   │   ├── flashcards.tsx
+│   │   ├── home.tsx          # Ana dashboard (streak, total, weekly goal, recent)
+│   │   ├── notes.tsx         # Not listesi + arama + etiket filtresi
+│   │   ├── quiz.tsx          # Quiz listesi + arama
 │   │   └── settings.tsx
-│   └── note/[id].tsx
+│   ├── create-note.tsx       # Not oluşturma (ses / fotoğraf / dosya)
+│   ├── note/[id].tsx         # Not detay
+│   ├── quiz/[id].tsx         # Quiz player
+│   ├── flashcard/[id].tsx    # Flashcard player (spaced repetition)
+│   └── weekly-goal.tsx       # Haftalık hedef düzenleme
 ├── components/
-│   ├── ui/                 # Button, Input, Card, Modal
-│   └── study/               # RecordButton, ImagePickerButton, QuizCard, FlashcardView
+│   ├── ui/                   # Button, Input, Card, EmptyState
+│   └── study/                # AudioPlayerCard (not detay ses oynatma)
 ├── lib/
-│   ├── groq.ts              # transcribeAudio(), extractTextFromImage(), summarizeAndGenerateQuiz()
-│   ├── db.ts                 # expo-sqlite işlemleri
+│   ├── ai/                   # Sağlayıcıdan bağımsız AI katmanı
+│   │   ├── service.ts        # transcribeAudio, extractTextFromImage, generateSummary/Quiz/Flashcards, generateNoteMetadata
+│   │   ├── providers/        # adapter'lar (openai-compatible.ts, gemini.ts) + getProviderAdapter
+│   │   ├── prompts.ts, utils.ts, models.ts, model-classifier.ts, useModelCatalog.ts
+│   ├── db.ts                 # expo-sqlite işlemleri (versiyonlu migration)
+│   ├── spacedRepetition.ts   # SM-2-lite zamanlayıcı
+│   ├── AppContext.tsx        # Global state (dil, tema, AI ayarları, weeklyGoal)
 │   └── theme.ts
 ├── config/
-│   └── languages.ts          # Desteklenen diller — tek kaynak (single source of truth)
+│   ├── languages.ts          # Desteklenen diller — tek kaynak (single source of truth)
+│   └── providers.ts          # AI sağlayıcı meta verisi (id, ad, baseUrl) — tek kaynak
 ├── locales/
 │   ├── tr.json
 │   └── en.json
 ├── types/
-│   └── index.ts
+│   ├── index.ts              # Note, QuizQuestion, Flashcard
+│   └── ai.ts                 # ProviderId, AICapability, AISettings, AIProvider
 ├── .env.example
 └── docs/
-    └── SETUP.md              # Alıcı için kurulum kılavuzu
+    └── SETUP.md              # Alıcı için kurulum kılavuzu (Codester teslimi)
 ```
 
 ---
@@ -110,10 +123,11 @@ interface Note {
   sourceType: 'audio' | 'image';
   audioUri?: string;    // sourceType === 'audio' ise dolu
   imageUri?: string;    // sourceType === 'image' ise dolu
-  transcript: string;   // ses ise Whisper çıktısı, fotoğraf ise OCR çıktısı
+  transcript: string;   // ses ise stt çıktısı, fotoğraf ise OCR çıktısı
   summary: string;
   createdAt: string;
   language: LanguageCode; // config/languages.ts'den türetilir, hardcoded değil
+  tags: string[];       // AI'nin ürettiği 1-5 anahtar kelime (filtreleme için)
 }
 
 interface QuizQuestion {
@@ -130,6 +144,11 @@ interface Flashcard {
   front: string;
   back: string;
   lastReviewed?: string;
+  // Spaced repetition durumu (SM-2-lite, lib/spacedRepetition.ts)
+  interval: number;     // sonraki tekrara kadar gün sayısı
+  easeFactor: number;   // zorluk çarpanı (>= 1.3)
+  repetitions: number;  // ardışık başarılı tekrar sayısı
+  dueDate: string;      // kartın tekrar due olacağı ISO tarih
 }
 ```
 
@@ -138,12 +157,14 @@ interface Flashcard {
 ## 6. Ekran Listesi
 
 1. Onboarding (3 ekran, skip/next)
-2. Ana ekran — Not listesi
-3. Not oluşturma ekranı — ses kaydı (canlı süre göstergesi) VEYA fotoğraf çek/galeriden seç
-4. Not detay — transkript, özet, quiz/flashcard'a geç butonları
-5. Quiz ekranı
-6. Flashcard ekranı
-7. Ayarlar — dil, tema, API key
+2. Ana ekran — Home Dashboard (streak, toplam not, haftalık hedef, son notlar)
+3. Not listesi — arama (başlık) + AI etiket filtresi
+4. Not oluşturma ekranı — ses kaydı (canlı süre göstergesi) VEYA fotoğraf çek/galeriden seç/dosya
+5. Not detay — kaynak medya (fotoğraf önizleme / ses oynatma), transkript, özet, quiz/flashcard'a geç butonları
+6. Quiz listesi (arama) + Quiz player ekranı
+7. Flashcard ekranı (spaced repetition)
+8. Haftalık hedef düzenleme ekranı
+9. Ayarlar — dil, tema, AI sağlayıcı + model + API key
 
 ---
 

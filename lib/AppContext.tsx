@@ -10,7 +10,10 @@ const STORAGE_KEYS = {
   API_KEY: '@studymate_api_key',
   AI_SETTINGS: '@studymate_ai_settings',
   ONBOARDING_COMPLETED: '@studymate_onboarding',
+  WEEKLY_GOAL: '@studymate_weekly_goal',
 } as const;
+
+const DEFAULT_WEEKLY_GOAL = 25;
 
 const DEFAULT_AI_SETTINGS: AISettings = {
   providerId: 'groq',
@@ -33,6 +36,8 @@ interface AppContextType {
   setIsDarkMode: (isDark: boolean) => void;
   onboardingCompleted: boolean;
   setOnboardingCompleted: (completed: boolean) => void;
+  weeklyGoal: number;
+  setWeeklyGoal: (goal: number) => void;
   isReady: boolean;
 }
 
@@ -43,19 +48,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [aiSettings, setAiSettingsState] = useState<AISettings>(DEFAULT_AI_SETTINGS);
   const [isDarkMode, setIsDarkModeState] = useState<boolean>(true);
   const [onboardingCompleted, setOnboardingCompletedState] = useState<boolean>(false);
+  const [weeklyGoal, setWeeklyGoalState] = useState<number>(DEFAULT_WEEKLY_GOAL);
   const [isReady, setIsReady] = useState<boolean>(false);
 
   // Load persisted settings on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const [savedLang, savedDarkMode, savedAiSettings, savedApiKey, savedOnboarding] =
+        const [savedLang, savedDarkMode, savedAiSettings, savedApiKey, savedOnboarding, savedWeeklyGoal] =
           await Promise.all([
             AsyncStorage.getItem(STORAGE_KEYS.LANGUAGE),
             AsyncStorage.getItem(STORAGE_KEYS.DARK_MODE),
             AsyncStorage.getItem(STORAGE_KEYS.AI_SETTINGS),
             AsyncStorage.getItem(STORAGE_KEYS.API_KEY),
             AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED),
+            AsyncStorage.getItem(STORAGE_KEYS.WEEKLY_GOAL),
           ]);
 
         if (savedLang) {
@@ -82,6 +89,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (savedOnboarding !== null) {
           setOnboardingCompletedState(savedOnboarding === 'true');
+        }
+
+        if (savedWeeklyGoal !== null) {
+          const parsedGoal = parseInt(savedWeeklyGoal, 10);
+          if (Number.isFinite(parsedGoal) && parsedGoal > 0) {
+            setWeeklyGoalState(parsedGoal);
+          }
         }
       } catch (e) {
         console.error('Error loading settings:', e);
@@ -114,6 +128,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, String(completed));
   }, []);
 
+  const setWeeklyGoal = useCallback((goal: number) => {
+    const safeGoal = Math.max(1, Math.round(goal));
+    setWeeklyGoalState(safeGoal);
+    AsyncStorage.setItem(STORAGE_KEYS.WEEKLY_GOAL, String(safeGoal));
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
@@ -125,6 +145,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsDarkMode,
         onboardingCompleted,
         setOnboardingCompleted,
+        weeklyGoal,
+        setWeeklyGoal,
         isReady,
       }}
     >

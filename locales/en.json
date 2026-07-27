@@ -50,6 +50,9 @@
   "notes": {
     "title": "Notes",
     "searchPlaceholder": "Search notes...",
+    "allCategories": "All",
+    "noResultsTitle": "No matches",
+    "noResultsDesc": "No notes match your search or filter.",
     "lecture": "Lecture",
     "photo": "Photo",
     "emptyTitle": "No notes yet",
@@ -57,8 +60,8 @@
   },
   "createNote": {
     "title": "New Note",
-    "noteTitle": "Note title",
-    "noteTitlePlaceholder": "e.g. Lecture 5 — ML Basics",
+    "noteTitle": "Note title (optional)",
+    "noteTitlePlaceholder": "Leave empty to auto-name with AI",
     "chooseInput": "Choose input method",
     "recordAudio": "Record Audio",
     "recordAudioDesc": "Tap the mic to start recording your lecture",
@@ -72,6 +75,9 @@
   },
   "quiz": {
     "title": "Quiz",
+    "searchPlaceholder": "Search quizzes...",
+    "noResultsTitle": "No matches",
+    "noResultsDesc": "No quizzes match your search.",
     "emptyTitle": "No quizzes yet",
     "emptyDesc": "Generate a quiz from your notes to test your knowledge.",
     "questionOf": "Question {{current}} of {{total}}",
@@ -100,6 +106,12 @@
     "missed": "Missed",
     "remaining": "Remaining",
     "noneFound": "No flashcards found for this note."
+  },
+  "weeklyGoal": {
+    "title": "Weekly Goal",
+    "subtitle": "Set how many notes you aim to review each week. Your progress on the home screen is measured against this target.",
+    "perWeek": "notes / week",
+    "save": "Save Goal"
   },
   "noteDetail": {
     "summary": "Summary",
@@ -150,6 +162,7 @@
     "clearAllNotes": "Clear All Notes",
     "clearConfirmTitle": "Clear All Notes?",
     "clearConfirmMessage": "This will permanently delete all your notes, quizzes, and flashcards. This action cannot be undone.",
+    "clearSuccess": "All notes have been deleted",
     "keySaved": "API key saved successfully"
   }
 }

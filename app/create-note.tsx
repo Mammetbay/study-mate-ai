@@ -11,15 +11,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { useTranslation } from 'react-i18next';
 import { theme } from '../lib/theme';
 import { useAppContext, useThemeColors } from '../lib/AppContext';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { useAudioRecorder, useAudioRecorderState, RecordingPresets, requestRecordingPermissionsAsync } from 'expo-audio';
+import {
+  useAudioRecorder,
+  useAudioRecorderState,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+} from 'expo-audio';
 import { useSQLiteContext } from 'expo-sqlite';
-import { transcribeAudio, extractTextFromImage } from '../lib/ai/service';
+import { transcribeAudio, extractTextFromImage, generateNoteMetadata } from '../lib/ai/service';
 import { insertNote } from '../lib/db';
 import { Note } from '../types';
 
@@ -32,13 +39,56 @@ export default function CreateNoteScreen() {
 
   const [noteTitle, setNoteTitle] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   // Audio hooks
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const audioState = useAudioRecorderState(audioRecorder, 500);
 
   const generateId = () => Date.now().toString();
   const sttSupported = !!aiSettings.selectedModels.stt;
+
+  // Persists a note, using AI to fill in a title (when the user left it blank)
+  // and keyword tags. Metadata generation is best-effort: on failure we fall
+  // back to a date-based title and no tags so note creation never blocks.
+  const saveNote = async (params: {
+    sourceType: 'audio' | 'image';
+    transcript: string;
+    audioUri?: string;
+    imageUri?: string;
+  }) => {
+    const { sourceType, transcript, audioUri, imageUri } = params;
+    const fallbackTitle =
+      sourceType === 'audio'
+        ? `Lecture ${new Date().toLocaleDateString()}`
+        : `Photo Note ${new Date().toLocaleDateString()}`;
+
+    let title = noteTitle.trim();
+    let tags: string[] = [];
+    try {
+      const meta = await generateNoteMetadata(transcript, aiSettings, language);
+      if (!title) title = meta.title || fallbackTitle;
+      tags = meta.tags;
+    } catch (metaError) {
+      console.warn('Note metadata generation failed:', metaError);
+      if (!title) title = fallbackTitle;
+    }
+
+    const noteId = generateId();
+    const newNote: Note = {
+      id: noteId,
+      title,
+      sourceType,
+      audioUri,
+      imageUri,
+      transcript,
+      summary: '', // generated on demand from the note detail screen
+      createdAt: new Date().toISOString(),
+      language,
+      tags,
+    };
+    await insertNote(db, newNote);
+    router.replace(`/note/${noteId}` as any);
+  };
 
   const handleRecordToggle = async () => {
     if (!sttSupported) {
@@ -51,32 +101,20 @@ export default function CreateNoteScreen() {
         Alert.alert('Permission required', 'Microphone permission is needed to record lectures.');
         return;
       }
+      // Enable recording in the audio session — without this, recording fails
+      // to start (silently) on iOS and devices in silent mode.
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await audioRecorder.prepareToRecordAsync();
       audioRecorder.record();
     } else {
-      audioRecorder.stop();
+      await audioRecorder.stop();
       setIsProcessing(true);
       try {
         const audioUri = audioRecorder.uri;
         if (!audioUri) throw new Error('Recording failed');
 
-        // Transcribe
         const transcript = await transcribeAudio(audioUri, aiSettings, language);
-        
-        // Save to DB
-        const noteId = generateId();
-        const newNote: Note = {
-          id: noteId,
-          title: noteTitle || `Lecture ${new Date().toLocaleDateString()}`,
-          sourceType: 'audio',
-          audioUri,
-          transcript,
-          summary: 'Pending...', // AI Summary is Phase 4, set placeholder for now
-          createdAt: new Date().toISOString(),
-          language,
-        };
-        await insertNote(db, newNote);
-        router.replace(`/note/${noteId}` as any);
+        await saveNote({ sourceType: 'audio', transcript, audioUri });
       } catch (error: any) {
         if (error.message === 'NO_SPEECH_DETECTED') {
           const errorMsg = language === 'tr'
@@ -99,20 +137,7 @@ export default function CreateNoteScreen() {
     setIsProcessing(true);
     try {
       const transcript = await extractTextFromImage(base64Data, aiSettings, language);
-      
-      const noteId = generateId();
-      const newNote: Note = {
-        id: noteId,
-        title: noteTitle || `Photo Note ${new Date().toLocaleDateString()}`,
-        sourceType: 'image',
-        imageUri: uri,
-        transcript,
-        summary: 'Pending...',
-        createdAt: new Date().toISOString(),
-        language,
-      };
-      await insertNote(db, newNote);
-      router.replace(`/note/${noteId}` as any);
+      await saveNote({ sourceType: 'image', transcript, imageUri: uri });
     } catch (error: any) {
       if (error.message === 'NO_READABLE_TEXT') {
         const errorMsg = language === 'tr' 
@@ -156,8 +181,37 @@ export default function CreateNoteScreen() {
     }
   };
 
-  const handleFiles = () => {
-    Alert.alert('Coming Soon', 'File upload will be available in a future update.');
+  // Document picker returns only a URI; read the file and convert it to the
+  // base64 payload the vision OCR endpoint expects.
+  const uriToBase64 = async (uri: string): Promise<string> => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl.split(',')[1] ?? '');
+      };
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const handleFiles = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'image/*',
+        copyToCacheDirectory: true,
+      });
+      if (result.canceled) return;
+
+      const asset = result.assets[0];
+      const base64 = await uriToBase64(asset.uri);
+      if (!base64) throw new Error('Failed to read file');
+      await processImage(base64, asset.uri);
+    } catch (error: any) {
+      Alert.alert(t('common.error'), error?.message || t('common.unknownError'));
+    }
   };
 
   // Waveform bars (static decorative)
@@ -204,7 +258,7 @@ export default function CreateNoteScreen() {
             style={[styles.micButton, { borderColor: audioState.isRecording ? colors.error : colors.primary }]}
             onPress={handleRecordToggle}
             activeOpacity={0.7}
-            disabled={isProcessing || !sttSupported}
+            disabled={isProcessing}
           >
             <View
               style={[

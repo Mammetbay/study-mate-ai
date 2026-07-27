@@ -110,3 +110,12 @@ export function extractJsonArray(content: string): unknown[] {
   }
   return JSON.parse(jsonMatch[0]);
 }
+
+export function extractJsonObject(content: string): Record<string, unknown> {
+  const cleaned = cleanThinkTags(content);
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('INVALID_JSON_OBJECT');
+  }
+  return JSON.parse(jsonMatch[0]);
+}

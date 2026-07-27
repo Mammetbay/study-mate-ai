@@ -13,7 +13,8 @@ import { useTranslation } from 'react-i18next';
 import { useSQLiteContext } from 'expo-sqlite';
 import { theme } from '../../lib/theme';
 import { useThemeColors } from '../../lib/AppContext';
-import { getFlashcardsByNoteId, getNoteById, updateFlashcardReview } from '../../lib/db';
+import { getFlashcardsByNoteId, getNoteById, updateFlashcardSchedule } from '../../lib/db';
+import { schedule } from '../../lib/spacedRepetition';
 import { Flashcard, Note } from '../../types';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -81,7 +82,24 @@ export default function FlashcardPlayerScreen() {
     setResults(nextResults);
 
     try {
-      await updateFlashcardReview(db, card.id, new Date().toISOString());
+      // Recompute the spaced-repetition schedule from the card's current state
+      // and persist it so the next session surfaces due cards first.
+      const nextSchedule = schedule(
+        {
+          interval: card.interval,
+          easeFactor: card.easeFactor,
+          repetitions: card.repetitions,
+        },
+        result
+      );
+      const reviewedAt = new Date().toISOString();
+      await updateFlashcardSchedule(db, card.id, nextSchedule, reviewedAt);
+      // Keep local state in sync so re-marking recomputes from the new base.
+      setCards((prev) =>
+        prev.map((c, index) =>
+          index === currentIndex ? { ...c, ...nextSchedule, lastReviewed: reviewedAt } : c
+        )
+      );
     } catch (err) {
       console.error('Failed to update flashcard review:', err);
     }

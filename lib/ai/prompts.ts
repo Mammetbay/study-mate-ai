@@ -51,6 +51,23 @@ export function getFlashcardSystemPrompt(language: LanguageCode): string {
   return 'You are an educational flashcard assistant. Create 6 to 12 flashcards from the provided lecture note.\n\nOUTPUT FORMAT:\nReturn ONLY a valid JSON array. No explanations or extra text.\nExample:\n[\n  {\n    "front": "Question or term",\n    "back": "Short answer or definition"\n  }\n]\n\nRULES:\n- front: question, term, or concept\n- back: clear, concise answer\n- Do not use <think> tags.';
 }
 
+export function getNoteMetadataSystemPrompt(language: LanguageCode): string {
+  if (language === 'tr') {
+    return (
+      'Sen bir ders notu etiketleme asistanısın. Görevin verilen ders metnine kısa bir başlık ve 1-5 adet anahtar kelime (etiket) üretmektir.\n\n' +
+      'ÇIKTI FORMATI:\nSadece ve sadece geçerli bir JSON nesnesi döndür. Başka HİÇBİR açıklama veya metin ekleme.\n' +
+      'Örnek:\n{\n  "title": "Kısa ve açıklayıcı başlık",\n  "tags": ["konu", "kavram", "ders"]\n}\n\n' +
+      'KURALLAR:\n- title: en fazla 6 kelime, metnin ana konusunu yansıtsın.\n- tags: 1 ile 5 arası, tek/iki kelimelik kısa anahtar kelimeler.\n- Etiketler Türkçe ve küçük harfle olsun.\n- <think> etiketi kullanma.'
+    );
+  }
+  return (
+    'You are a study-note tagging assistant. Your task is to produce a short title and 1-5 keywords (tags) for the given lecture note.\n\n' +
+    'OUTPUT FORMAT:\nReturn ONLY a valid JSON object. No explanations or extra text.\n' +
+    'Example:\n{\n  "title": "Short descriptive title",\n  "tags": ["topic", "concept", "subject"]\n}\n\n' +
+    'RULES:\n- title: at most 6 words, reflecting the main topic.\n- tags: between 1 and 5 short one/two-word keywords.\n- Keep tags lowercase.\n- Do not use <think> tags.'
+  );
+}
+
 export function getWhisperInitialPrompt(language: LanguageCode): string {
   if (language === 'tr') {
     return 'Ders anlatımı, öğretmen ve öğrenci konuşması, ders notları kaydı. Altyazı veya video kapanış metni içermez.';

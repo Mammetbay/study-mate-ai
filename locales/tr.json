@@ -16,8 +16,8 @@
     "unknownError": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
     "apiKeyRequired": "API Anahtarı Gerekli",
     "apiKeyRequiredMessage": "Lütfen önce Ayarlar'dan {{provider}} API anahtarınızı girin.",
-    "capabilityNotSupported": "{{provider}} bu ozelligi desteklemiyor: {{capability}}",
-    "sttNotSupported": "Bu saglayici ses transkripsiyonunu desteklemiyor"
+    "capabilityNotSupported": "{{provider}} bu özelliği desteklemiyor: {{capability}}",
+    "sttNotSupported": "Bu sağlayıcı ses transkripsiyonunu desteklemiyor"
   },
   "tabs": {
     "home": "Ana Sayfa",
@@ -50,6 +50,9 @@
   "notes": {
     "title": "Notlar",
     "searchPlaceholder": "Notlarda ara...",
+    "allCategories": "Tümü",
+    "noResultsTitle": "Sonuç yok",
+    "noResultsDesc": "Aramanıza veya filtrenize uyan not bulunamadı.",
     "lecture": "Ders",
     "photo": "Fotoğraf",
     "emptyTitle": "Henüz not yok",
@@ -57,8 +60,8 @@
   },
   "createNote": {
     "title": "Yeni Not",
-    "noteTitle": "Not başlığı",
-    "noteTitlePlaceholder": "ör. Ders 5 — ML Temelleri",
+    "noteTitle": "Not başlığı (isteğe bağlı)",
+    "noteTitlePlaceholder": "Boş bırakırsan AI otomatik isim verir",
     "chooseInput": "Giriş yöntemini seçin",
     "recordAudio": "Ses Kaydet",
     "recordAudioDesc": "Dersinizi kaydetmek için mikrofona dokunun",
@@ -72,6 +75,9 @@
   },
   "quiz": {
     "title": "Quiz",
+    "searchPlaceholder": "Quizlerde ara...",
+    "noResultsTitle": "Sonuç yok",
+    "noResultsDesc": "Aramanıza uyan quiz bulunamadı.",
     "emptyTitle": "Henüz quiz yok",
     "emptyDesc": "Bilginizi test etmek için notlarınızdan bir quiz oluşturun.",
     "questionOf": "Soru {{current}} / {{total}}",
@@ -101,6 +107,12 @@
     "remaining": "Kalan",
     "noneFound": "Bu not için flashcard bulunamadı."
   },
+  "weeklyGoal": {
+    "title": "Haftalık Hedef",
+    "subtitle": "Her hafta kaç not incelemeyi hedeflediğini belirle. Ana sayfadaki ilerlemen bu hedefe göre ölçülür.",
+    "perWeek": "not / hafta",
+    "save": "Hedefi Kaydet"
+  },
   "noteDetail": {
     "summary": "Özet",
     "transcript": "Transkript",
@@ -127,19 +139,19 @@
     "dark": "Koyu",
     "light": "Açık",
     "aiConfiguration": "AI YAPILANDIRMASI",
-    "provider": "Saglayici",
-    "selectProvider": "AI Saglayici Secin",
+    "provider": "Sağlayıcı",
+    "selectProvider": "AI Sağlayıcı Seçin",
     "sttModel": "STT Modeli",
-    "visionModel": "Gorsel Model",
+    "visionModel": "Görsel Model",
     "chatModel": "Chat Modeli",
-    "selectModel": "Model Secin",
-    "modelNotAvailable": "{{provider}} ile kullanilabilir degil",
-    "loadingModels": "Modeller yukleniyor…",
-    "keyRequiredForModels": "Modelleri yuklemek icin bir API anahtari girip kaydedin",
-    "modelsLoadError": "Modeller yuklenemedi. API anahtarinizi kontrol edip yenileyin.",
-    "noModelsAvailable": "Kullanilabilir model yok",
-    "apiKey": "API Anahtari",
-    "apiKeyPlaceholder": "{{provider}} API anahtarinizi girin",
+    "selectModel": "Model Seçin",
+    "modelNotAvailable": "{{provider}} ile kullanılabilir değil",
+    "loadingModels": "Modeller yükleniyor…",
+    "keyRequiredForModels": "Modelleri yüklemek için bir API anahtarı girip kaydedin",
+    "modelsLoadError": "Modeller yüklenemedi. API anahtarınızı kontrol edip yenileyin.",
+    "noModelsAvailable": "Kullanılabilir model yok",
+    "apiKey": "API Anahtarı",
+    "apiKeyPlaceholder": "{{provider}} API anahtarınızı girin",
     "apiKeyHint": "Anahtarınız yerel olarak saklanır ve paylaşılmaz. AI transkripsiyon, özetleme ve quiz üretimi için kullanılır.",
     "saveKey": "Anahtarı Kaydet",
     "about": "HAKKINDA",
@@ -150,6 +162,7 @@
     "clearAllNotes": "Tüm Notları Sil",
     "clearConfirmTitle": "Tüm Notlar Silinsin mi?",
     "clearConfirmMessage": "Bu işlem tüm notlarınızı, quizlerinizi ve flashcard'larınızı kalıcı olarak silecektir. Bu işlem geri alınamaz.",
+    "clearSuccess": "Tüm notlar silindi",
     "keySaved": "API anahtarı başarıyla kaydedildi"
   }
 }

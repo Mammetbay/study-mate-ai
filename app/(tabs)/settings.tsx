@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Linking,
   Modal,
   ScrollView,
   StyleSheet,
@@ -21,7 +22,10 @@ import { SectionHeader } from '../../components/ui/SectionHeader';
 import { SettingsRow } from '../../components/ui/SettingsRow';
 import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../config/languages';
 import { PROVIDERS } from '../../config/providers';
+import { ABOUT_LINKS } from '../../config/about';
 import { useModelCatalog } from '../../lib/ai/useModelCatalog';
+import { clearAllNotes } from '../../lib/db';
+import { useSQLiteContext } from 'expo-sqlite';
 import { useAppContext, useThemeColors } from '../../lib/AppContext';
 import { theme } from '../../lib/theme';
 import { AICapability, AIModel, AISettings, ProviderId } from '../../types/ai';
@@ -29,6 +33,7 @@ import { AICapability, AIModel, AISettings, ProviderId } from '../../types/ai';
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const colors = useThemeColors();
+  const db = useSQLiteContext();
   const {
     language,
     setLanguage,
@@ -43,6 +48,18 @@ export default function SettingsScreen() {
   const [showApiKey, setShowApiKey] = useState(false);
   const [modelPickerVisible, setModelPickerVisible] = useState(false);
   const [activeModelCapability, setActiveModelCapability] = useState<AICapability>('chat');
+
+  // Opens an external URL (or mailto:), surfacing a friendly error if the
+  // device has no app able to handle it.
+  const openLink = async (url: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (!supported) throw new Error('unsupported');
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert(t('common.error'), t('common.unknownError'));
+    }
+  };
 
   const currentProvider = useMemo(
     () => PROVIDERS.find((p) => p.id === aiSettings.providerId)!,
@@ -140,8 +157,13 @@ export default function SettingsScreen() {
         {
           text: t('common.delete'),
           style: 'destructive',
-          onPress: () => {
-            // Will be implemented when DB helpers are ready
+          onPress: async () => {
+            try {
+              await clearAllNotes(db);
+              Alert.alert('', t('settings.clearSuccess'));
+            } catch (error) {
+              Alert.alert(t('common.error'), t('common.unknownError'));
+            }
           },
         },
       ]
@@ -457,9 +479,24 @@ export default function SettingsScreen() {
         <SectionHeader title={t('settings.about')} />
         <Card>
           <SettingsRow icon="info-circle" label={t('settings.version')} value="1.0.0" />
-          <SettingsRow icon="file-alt" label={t('settings.privacyPolicy')} showChevron onPress={() => {}} />
-          <SettingsRow icon="shield-alt" label={t('settings.termsOfService')} showChevron onPress={() => {}} />
-          <SettingsRow icon="envelope" label={t('settings.contactSupport')} showChevron onPress={() => {}} />
+          <SettingsRow
+            icon="file-alt"
+            label={t('settings.privacyPolicy')}
+            showChevron
+            onPress={() => openLink(ABOUT_LINKS.privacyPolicyUrl)}
+          />
+          <SettingsRow
+            icon="shield-alt"
+            label={t('settings.termsOfService')}
+            showChevron
+            onPress={() => openLink(ABOUT_LINKS.termsOfServiceUrl)}
+          />
+          <SettingsRow
+            icon="envelope"
+            label={t('settings.contactSupport')}
+            showChevron
+            onPress={() => openLink(`mailto:${ABOUT_LINKS.supportEmail}`)}
+          />
         </Card>
 
         {/* Clear All Notes */}

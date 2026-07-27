@@ -11,9 +11,11 @@ import {
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import { useSQLiteContext } from 'expo-sqlite';
 import { theme } from '../../lib/theme';
+import { AudioPlayerCard } from '../../components/study/AudioPlayerCard';
 import { useAppContext, useThemeColors } from '../../lib/AppContext';
 import {
   getFlashcardsByNoteId,
@@ -231,6 +233,18 @@ export default function NoteDetailScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Source media: original photo or audio playback */}
+        {note.sourceType === 'image' && note.imageUri ? (
+          <Image
+            source={{ uri: note.imageUri }}
+            style={styles.sourceImage}
+            contentFit="cover"
+            transition={150}
+          />
+        ) : note.sourceType === 'audio' && note.audioUri ? (
+          <AudioPlayerCard uri={note.audioUri} />
+        ) : null}
+
         {activeTab === 'summary' ? (
           <Card style={styles.contentCard}>
             <View style={styles.sectionHeaderRow}>
@@ -377,6 +391,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.screenPadding,
     paddingBottom: 40,
     gap: 16,
+  },
+  sourceImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: theme.radius.card,
   },
   contentCard: {
     marginBottom: 4,

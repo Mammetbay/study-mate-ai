@@ -10,6 +10,8 @@ export interface Note {
   summary: string;
   createdAt: string;
   language: LanguageCode;
+  // AI-generated keywords (1-5) used for filtering. See generateNoteMetadata.
+  tags: string[];
 }
 
 export interface QuizQuestion {
@@ -26,4 +28,9 @@ export interface Flashcard {
   front: string;
   back: string;
   lastReviewed?: string;
+  // Spaced repetition state (SM-2-lite). See lib/spacedRepetition.ts
+  interval: number; // days until next review
+  easeFactor: number; // difficulty multiplier (>= 1.3)
+  repetitions: number; // consecutive successful reviews
+  dueDate: string; // ISO date when the card is next due
 }

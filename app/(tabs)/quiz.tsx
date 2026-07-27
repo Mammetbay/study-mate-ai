@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +27,14 @@ export default function QuizScreen() {
 
   const [items, setItems] = useState<NoteWithQuizInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  // Filter quizzes by their note title.
+  const filteredItems = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return items;
+    return items.filter((item) => item.noteTitle.toLowerCase().includes(query));
+  }, [items, search]);
 
   useFocusEffect(
     useCallback(() => {
@@ -85,6 +94,30 @@ export default function QuizScreen() {
         <Text style={[styles.title, { color: colors.textPrimary }]}>{t('quiz.title')}</Text>
       </View>
 
+      {/* Search bar (shown once there are quizzes to filter) */}
+      {items.length > 0 && (
+        <View style={styles.searchWrap}>
+          <View style={[styles.searchBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <FontAwesome5 name="search" size={14} color={colors.textSecondary} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.textPrimary }]}
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t('quiz.searchPlaceholder')}
+              placeholderTextColor={colors.textSecondary}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+            {search.length > 0 && (
+              <TouchableOpacity onPress={() => setSearch('')} hitSlop={8}>
+                <FontAwesome5 name="times-circle" size={16} color={colors.textSecondary} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      )}
+
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -95,13 +128,20 @@ export default function QuizScreen() {
           title={t('quiz.emptyTitle')}
           description={t('quiz.emptyDesc')}
         />
+      ) : filteredItems.length === 0 ? (
+        <EmptyState
+          icon="search"
+          title={t('quiz.noResultsTitle')}
+          description={t('quiz.noResultsDesc')}
+        />
       ) : (
         <FlatList
-          data={items}
+          data={filteredItems}
           keyExtractor={(item) => item.noteId}
           renderItem={renderQuizCard}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         />
       )}
     </SafeAreaView>
@@ -120,6 +160,25 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: theme.typography.fontFamily.bold,
     fontSize: 28,
+  },
+  searchWrap: {
+    paddingHorizontal: theme.spacing.screenPadding,
+    marginBottom: 12,
+  },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: theme.radius.input,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: 15,
+    padding: 0,
   },
   loadingContainer: {
     flex: 1,

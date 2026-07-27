@@ -2,9 +2,11 @@ import { LanguageCode } from '../../config/languages';
 import { AISettings, ChatMessage } from '../../types/ai';
 import { Flashcard, QuizQuestion } from '../../types';
 import { getProviderAdapter } from './providers';
-import { cleanAndValidateExtractedText, cleanThinkTags, extractJsonArray } from './utils';
+import { initialSRState } from '../spacedRepetition';
+import { cleanAndValidateExtractedText, cleanThinkTags, extractJsonArray, extractJsonObject } from './utils';
 import {
   getFlashcardSystemPrompt,
+  getNoteMetadataSystemPrompt,
   getOcrSystemPrompt,
   getOcrUserPrompt,
   getQuizSystemPrompt,
@@ -100,6 +102,52 @@ export async function generateSummary(
   }
 }
 
+export interface NoteMetadata {
+  title: string;
+  tags: string[];
+}
+
+/**
+ * Generates a short title and 1-5 keyword tags for a note from its transcript.
+ * Callers should treat this as best-effort: on any failure they fall back to a
+ * default title and empty tags. Tags are normalized to lowercase, trimmed,
+ * de-duplicated and capped at 5.
+ */
+export async function generateNoteMetadata(
+  transcript: string,
+  settings: AISettings,
+  language: LanguageCode
+): Promise<NoteMetadata> {
+  const adapter = getProviderAdapter(settings.providerId);
+  const apiKey = getApiKey(settings);
+  const model = getModel(settings, 'chat');
+
+  const messages: ChatMessage[] = [
+    { role: 'system', content: getNoteMetadataSystemPrompt(language) },
+    { role: 'user', content: `Ders Metni:\n${transcript}` },
+  ];
+
+  const content = await adapter.chatCompletion(messages, apiKey, model, {
+    temperature: 0.3,
+    maxTokens: 256,
+  });
+
+  const parsed = extractJsonObject(content);
+  const rawTitle = typeof parsed.title === 'string' ? parsed.title.trim() : '';
+  const rawTags = Array.isArray(parsed.tags) ? parsed.tags : [];
+
+  const tags = Array.from(
+    new Set(
+      rawTags
+        .filter((tag): tag is string => typeof tag === 'string')
+        .map((tag) => tag.trim().toLowerCase())
+        .filter(Boolean)
+    )
+  ).slice(0, 5);
+
+  return { title: rawTitle, tags };
+}
+
 export async function generateQuiz(
   noteId: string,
   transcript: string,
@@ -166,6 +214,8 @@ export async function generateFlashcards(
         noteId,
         front: card.front as string,
         back: card.back as string,
+        // Start every card due immediately with default SM-2 parameters.
+        ...initialSRState(),
       }));
   } catch (error) {
     console.error('generateFlashcards error:', error);

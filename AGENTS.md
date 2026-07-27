@@ -20,7 +20,7 @@ React Native + Expo ile geliştirilen, satılabilir bir kod şablonu (Codester).
 - Stil: StyleSheet + `lib/theme.ts` — NativeWind/Tailwind YOK
 - i18n: react-i18next, diller `config/languages.ts`'den okunur
 - Ses/Video: expo-audio ve expo-video (Eski olan expo-av KULLANILMAZ)
-- AI: Groq Whisper (transkript), Groq Vision (fotoğraf OCR), Groq Llama (özet/quiz)
+- AI: Çoklu sağlayıcı (adapter) mimarisi — Groq, OpenAI, Google Gemini, OpenRouter. Meta veri `config/providers.ts`'de; model listeleri runtime'da her sağlayıcının API'sinden canlı çekilir (hardcode değil). İş fonksiyonları (transkript, OCR, özet, quiz, flashcard) sağlayıcıdan bağımsız `lib/ai/service.ts` üzerinden çağrılır. Yetenekler `stt | vision | chat` olarak sınıflandırılır. Detay: `memory.md` (2026-07-27 kaydı)
 
 ## Build & Çalıştırma
 
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
 
 ## Kesin Sınırlar (asla yapma)
 
-- Groq API key'i asla hardcode etme — `.env`'den `process.env` ile oku, alıcı kendi key'ini girer
+- Hiçbir sağlayıcının API key'ini (Groq/OpenAI/Gemini/OpenRouter) asla hardcode etme — key'ler kullanıcı tarafından ayarlardan girilir ve sağlayıcı başına saklanır; kodda hardcoded key YOK
 - Kullanıcı hesabı, auth, backend sunucu, billing EKLEME — bu bir client-only şablon (bkz. scope doc §1, "Dahil Değil")
 - Redux/Zustand/MobX ekleme — Context API yeterli
 - NativeWind/Tailwind ekleme — StyleSheet + theme.ts kullan

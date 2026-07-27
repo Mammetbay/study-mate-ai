@@ -46,6 +46,10 @@ function RootLayoutNav() {
           name="create-note"
           options={{ animation: 'slide_from_bottom' }}
         />
+        <Stack.Screen
+          name="weekly-goal"
+          options={{ animation: 'slide_from_bottom' }}
+        />
       </Stack>
     </>
   );
