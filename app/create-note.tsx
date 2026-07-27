@@ -19,14 +19,14 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAudioRecorder, useAudioRecorderState, RecordingPresets, requestRecordingPermissionsAsync } from 'expo-audio';
 import { useSQLiteContext } from 'expo-sqlite';
-import { transcribeAudio, extractTextFromImage } from '../lib/groq';
+import { transcribeAudio, extractTextFromImage } from '../lib/ai/service';
 import { insertNote } from '../lib/db';
 import { Note } from '../types';
 
 export default function CreateNoteScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { apiKey, language } = useAppContext();
+  const { aiSettings, language } = useAppContext();
   const colors = useThemeColors();
   const db = useSQLiteContext();
 
@@ -38,8 +38,13 @@ export default function CreateNoteScreen() {
   const audioState = useAudioRecorderState(audioRecorder, 500);
 
   const generateId = () => Date.now().toString();
+  const sttSupported = !!aiSettings.selectedModels.stt;
 
   const handleRecordToggle = async () => {
+    if (!sttSupported) {
+      Alert.alert('', t('common.sttNotSupported'));
+      return;
+    }
     if (!audioState.isRecording) {
       const permission = await requestRecordingPermissionsAsync();
       if (!permission.granted) {
@@ -54,9 +59,9 @@ export default function CreateNoteScreen() {
       try {
         const audioUri = audioRecorder.uri;
         if (!audioUri) throw new Error('Recording failed');
-        
+
         // Transcribe
-        const transcript = await transcribeAudio(audioUri, apiKey, language);
+        const transcript = await transcribeAudio(audioUri, aiSettings, language);
         
         // Save to DB
         const noteId = generateId();
@@ -93,7 +98,7 @@ export default function CreateNoteScreen() {
   const processImage = async (base64Data: string, uri: string) => {
     setIsProcessing(true);
     try {
-      const transcript = await extractTextFromImage(base64Data, apiKey, language);
+      const transcript = await extractTextFromImage(base64Data, aiSettings, language);
       
       const noteId = generateId();
       const newNote: Note = {
@@ -199,7 +204,7 @@ export default function CreateNoteScreen() {
             style={[styles.micButton, { borderColor: audioState.isRecording ? colors.error : colors.primary }]}
             onPress={handleRecordToggle}
             activeOpacity={0.7}
-            disabled={isProcessing}
+            disabled={isProcessing || !sttSupported}
           >
             <View
               style={[

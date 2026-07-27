@@ -23,7 +23,7 @@ import {
   insertQuizQuestions,
   updateNoteSummary,
 } from '../../lib/db';
-import { generateFlashcards, generateQuiz, generateSummary } from '../../lib/groq';
+import { generateFlashcards, generateQuiz, generateSummary } from '../../lib/ai/service';
 import { Flashcard, Note, QuizQuestion } from '../../types';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -35,7 +35,7 @@ export default function NoteDetailScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const colors = useThemeColors();
-  const { apiKey, language } = useAppContext();
+  const { aiSettings, language } = useAppContext();
   const db = useSQLiteContext();
 
   const [note, setNote] = useState<Note | null>(null);
@@ -78,9 +78,14 @@ export default function NoteDetailScreen() {
     }, [id, db])
   );
 
+  const providerName = aiSettings.providerId.charAt(0).toUpperCase() + aiSettings.providerId.slice(1);
+
   const requireApiKey = (): boolean => {
-    if (!apiKey) {
-      Alert.alert(t('common.apiKeyRequired'), t('common.apiKeyRequiredMessage'));
+    if (!aiSettings.apiKeys[aiSettings.providerId]) {
+      Alert.alert(
+        t('common.apiKeyRequired'),
+        t('common.apiKeyRequiredMessage', { provider: providerName })
+      );
       return false;
     }
     return true;
@@ -91,7 +96,7 @@ export default function NoteDetailScreen() {
 
     setGeneratingSummary(true);
     try {
-      const summaryText = await generateSummary(note.transcript, apiKey, language);
+      const summaryText = await generateSummary(note.transcript, aiSettings, language);
       await updateNoteSummary(db, note.id, summaryText);
       setNote((prev) => (prev ? { ...prev, summary: summaryText } : null));
     } catch (error: unknown) {
@@ -107,7 +112,7 @@ export default function NoteDetailScreen() {
 
     setGeneratingQuiz(true);
     try {
-      const questions = await generateQuiz(note.id, note.transcript, apiKey, language);
+      const questions = await generateQuiz(note.id, note.transcript, aiSettings, language);
       await insertQuizQuestions(db, questions);
       setQuizzes(questions);
     } catch (error: unknown) {
@@ -123,7 +128,7 @@ export default function NoteDetailScreen() {
 
     setGeneratingFlashcards(true);
     try {
-      const cards = await generateFlashcards(note.id, note.transcript, apiKey, language);
+      const cards = await generateFlashcards(note.id, note.transcript, aiSettings, language);
       await insertFlashcards(db, cards);
       setFlashcards(cards);
     } catch (error: unknown) {
