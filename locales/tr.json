@@ -17,7 +17,12 @@
     "apiKeyRequired": "API Anahtarı Gerekli",
     "apiKeyRequiredMessage": "Lütfen önce Ayarlar'dan {{provider}} API anahtarınızı girin.",
     "capabilityNotSupported": "{{provider}} bu özelliği desteklemiyor: {{capability}}",
-    "sttNotSupported": "Bu sağlayıcı ses transkripsiyonunu desteklemiyor"
+    "sttNotSupported": "Bu sağlayıcı ses transkripsiyonunu desteklemiyor",
+    "share": "Paylaş",
+    "shareNote": "Notu Paylaş",
+    "loadSampleNote": "Örnek Dersi Yükle (Demo)",
+    "sampleLoaded": "Örnek ders yüklendi! Artık özet, quiz ve flashcard'ları inceleyebilirsiniz.",
+    "freeKeyTip": "Ücretsiz Key Al (Kartsız)"
   },
   "tabs": {
     "home": "Ana Sayfa",
@@ -45,7 +50,8 @@
     "recentNotes": "Son Notlar",
     "noNotesYet": "Henüz not yok",
     "noNotesDesc": "Bir ders kaydedin veya notlarınızı tarayarak başlayın.",
-    "createFirstNote": "İlk Notunuzu Oluşturun"
+    "createFirstNote": "İlk Notunuzu Oluşturun",
+    "loadSample": "Örnek Dersi Dene"
   },
   "notes": {
     "title": "Notlar",
@@ -56,7 +62,8 @@
     "lecture": "Ders",
     "photo": "Fotoğraf",
     "emptyTitle": "Henüz not yok",
-    "emptyDesc": "İlk notunuzu oluşturmak için + butonuna basın."
+    "emptyDesc": "İlk notunuzu oluşturmak için + butonuna basın.",
+    "loadSample": "Örnek Dersi Yükle"
   },
   "createNote": {
     "title": "Yeni Not",
@@ -128,6 +135,7 @@
     "generateFlashcards": "Flashcard Oluştur",
     "generatingFlashcards": "Flashcard Oluşturuluyor...",
     "openFlashcards": "Flashcard'ları Aç",
+    "shareSummary": "Özeti Paylaş",
     "notFound": "Not bulunamadı"
   },
   "settings": {
@@ -154,6 +162,10 @@
     "apiKeyPlaceholder": "{{provider}} API anahtarınızı girin",
     "apiKeyHint": "Anahtarınız yerel olarak saklanır ve paylaşılmaz. AI transkripsiyon, özetleme ve quiz üretimi için kullanılır.",
     "saveKey": "Anahtarı Kaydet",
+    "freeKeys": "ÜCRETSİZ AI SEÇENEKLERİ",
+    "freeKeyNotice": "Groq veya Google Gemini üzerinden kredi kartı gerektirmeden ücretsiz API anahtarı alabilirsiniz.",
+    "demoSection": "DEMO & TEST",
+    "loadSampleDesc": "API anahtarına ihtiyaç duymadan hazır quiz ve flashcard'lar içeren örnek bir ders yükleyin.",
     "about": "HAKKINDA",
     "version": "Sürüm",
     "privacyPolicy": "Gizlilik Politikası",

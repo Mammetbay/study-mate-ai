@@ -16,8 +16,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { useThemeColors } from '../../lib/AppContext';
+import { useAppContext, useThemeColors } from '../../lib/AppContext';
 import { getAllTags, getNotes } from '../../lib/db';
+import { insertSampleData } from '../../lib/sampleData';
 import { theme } from '../../lib/theme';
 import { Note } from '../../types';
 
@@ -28,12 +29,28 @@ export default function NotesScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const db = useSQLiteContext();
+  const { language } = useAppContext();
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeTag, setActiveTag] = useState<string>(ALL_TAGS);
+
+  const handleLoadSample = async () => {
+    try {
+      setLoading(true);
+      const sampleId = await insertSampleData(db, language);
+      const [data, allTags] = await Promise.all([getNotes(db), getAllTags(db)]);
+      setNotes(data);
+      setTags(allTags);
+      router.push(`/note/${sampleId}` as any);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -201,11 +218,23 @@ export default function NotesScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : notes.length === 0 ? (
-        <EmptyState
-          icon="file-alt"
-          title={t('notes.emptyTitle')}
-          description={t('notes.emptyDesc')}
-        />
+        <View style={styles.emptyWrap}>
+          <EmptyState
+            icon="file-alt"
+            title={t('notes.emptyTitle')}
+            description={t('notes.emptyDesc')}
+          />
+          <TouchableOpacity
+            style={[styles.sampleBtn, { borderColor: colors.primary, backgroundColor: colors.surface }]}
+            onPress={handleLoadSample}
+            activeOpacity={0.8}
+          >
+            <FontAwesome5 name="magic" size={14} color={colors.primary} />
+            <Text style={[styles.sampleBtnText, { color: colors.primary }]}>
+              {t('notes.loadSample')}
+            </Text>
+          </TouchableOpacity>
+        </View>
       ) : filteredNotes.length === 0 ? (
         <EmptyState
           icon="search"
@@ -352,5 +381,23 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sampleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: theme.radius.button,
+    borderWidth: 1,
+    marginTop: -12,
+  },
+  sampleBtnText: {
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: 14,
   },
 });

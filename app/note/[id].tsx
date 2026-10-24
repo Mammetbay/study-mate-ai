@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Share,
 } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -141,6 +142,23 @@ export default function NoteDetailScreen() {
     }
   };
 
+  const handleShareNote = async () => {
+    if (!note) return;
+    try {
+      const shareText = `📚 ${note.title}\n\n` +
+        (note.summary ? `📝 SUMMARY:\n${note.summary}\n\n` : '') +
+        `📖 TRANSCRIPT:\n${note.transcript}\n\n` +
+        `---\nShared via StudyMate AI 🎓 (Local & Free AI Study Assistant)`;
+
+      await Share.share({
+        title: note.title,
+        message: shareText,
+      });
+    } catch (err) {
+      console.error('Share error:', err);
+    }
+  };
+
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
@@ -187,6 +205,14 @@ export default function NoteDetailScreen() {
             {note.title}
           </Text>
         </View>
+        <TouchableOpacity
+          style={[styles.iconButton, { backgroundColor: colors.surface }]}
+          onPress={handleShareNote}
+          activeOpacity={0.7}
+          hitSlop={8}
+        >
+          <FontAwesome5 name="share-alt" size={15} color={colors.primary} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.tabRow}>

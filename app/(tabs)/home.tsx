@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../../components/ui/Card';
 import { useAppContext, useThemeColors } from '../../lib/AppContext';
 import { getNotes } from '../../lib/db';
+import { insertSampleData } from '../../lib/sampleData';
 import { theme } from '../../lib/theme';
 import { Note } from '../../types';
 
@@ -40,9 +41,20 @@ export default function HomeScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const db = useSQLiteContext();
-  const { weeklyGoal } = useAppContext();
+  const { weeklyGoal, language } = useAppContext();
 
   const [notes, setNotes] = useState<Note[]>([]);
+
+  const handleLoadSample = async () => {
+    try {
+      const sampleId = await insertSampleData(db, language);
+      const data = await getNotes(db);
+      setNotes(data);
+      router.push(`/note/${sampleId}` as any);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -177,6 +189,16 @@ export default function HomeScreen() {
               <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>
                 {t('home.noNotesDesc')}
               </Text>
+              <TouchableOpacity
+                style={[styles.sampleBtn, { borderColor: colors.primary, backgroundColor: `${colors.primary}18` }]}
+                onPress={handleLoadSample}
+                activeOpacity={0.8}
+              >
+                <FontAwesome5 name="magic" size={13} color={colors.primary} />
+                <Text style={[styles.sampleBtnText, { color: colors.primary }]}>
+                  {t('home.loadSample')}
+                </Text>
+              </TouchableOpacity>
             </View>
           </Card>
         ) : (
@@ -392,5 +414,19 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  sampleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: theme.radius.button,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  sampleBtnText: {
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: 13,
   },
 });

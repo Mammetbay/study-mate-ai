@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { SectionHeader } from '../../components/ui/SectionHeader';
@@ -25,12 +26,21 @@ import { PROVIDERS } from '../../config/providers';
 import { ABOUT_LINKS } from '../../config/about';
 import { useModelCatalog } from '../../lib/ai/useModelCatalog';
 import { clearAllNotes } from '../../lib/db';
+import { insertSampleData } from '../../lib/sampleData';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useAppContext, useThemeColors } from '../../lib/AppContext';
 import { theme } from '../../lib/theme';
 import { AICapability, AIModel, AISettings, ProviderId } from '../../types/ai';
 
+const PROVIDER_KEY_URLS: Record<ProviderId, { label: string; url: string }> = {
+  groq: { label: '⚡ Get Free Groq Key (No card)', url: 'https://console.groq.com/keys' },
+  gemini: { label: '🧠 Get Free Gemini Key (Free tier)', url: 'https://aistudio.google.com/app/apikey' },
+  openrouter: { label: '🌐 Get OpenRouter Key', url: 'https://openrouter.ai/keys' },
+  openai: { label: '🔑 Get OpenAI Key', url: 'https://platform.openai.com/api-keys' },
+};
+
 export default function SettingsScreen() {
+  const router = useRouter();
   const { t } = useTranslation();
   const colors = useThemeColors();
   const db = useSQLiteContext();
@@ -148,6 +158,30 @@ export default function SettingsScreen() {
     return catalog[capability].find((m) => m.id === modelId)?.label ?? modelId;
   };
 
+  const [loadingSample, setLoadingSample] = useState(false);
+
+  const handleLoadSample = async () => {
+    setLoadingSample(true);
+    try {
+      const noteId = await insertSampleData(db, language);
+      Alert.alert(
+        t('common.loadSampleNote'),
+        t('common.sampleLoaded'),
+        [
+          { text: t('common.done'), style: 'cancel' },
+          {
+            text: t('notes.lecture'),
+            onPress: () => router.push(`/note/${noteId}` as any),
+          },
+        ]
+      );
+    } catch {
+      Alert.alert(t('common.error'), t('common.unknownError'));
+    } finally {
+      setLoadingSample(false);
+    }
+  };
+
   const handleClearNotes = () => {
     Alert.alert(
       t('settings.clearConfirmTitle'),
@@ -161,7 +195,7 @@ export default function SettingsScreen() {
             try {
               await clearAllNotes(db);
               Alert.alert('', t('settings.clearSuccess'));
-            } catch (error) {
+            } catch {
               Alert.alert(t('common.error'), t('common.unknownError'));
             }
           },
@@ -315,6 +349,18 @@ export default function SettingsScreen() {
               icon={<FontAwesome5 name="save" size={14} color={colors.textOnPrimary} />}
               style={styles.saveButton}
             />
+            {PROVIDER_KEY_URLS[aiSettings.providerId] && (
+              <TouchableOpacity
+                style={[styles.freeKeyLink, { borderColor: colors.border, backgroundColor: colors.surface }]}
+                onPress={() => openLink(PROVIDER_KEY_URLS[aiSettings.providerId].url)}
+                activeOpacity={0.7}
+              >
+                <FontAwesome5 name="external-link-alt" size={12} color={colors.accent} />
+                <Text style={[styles.freeKeyText, { color: colors.accent }]}>
+                  {PROVIDER_KEY_URLS[aiSettings.providerId].label}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         
 
@@ -474,6 +520,22 @@ export default function SettingsScreen() {
             </View>
           </TouchableOpacity>
         </Modal>
+
+        {/* DEMO & TESTING */}
+        <SectionHeader title={t('settings.demoSection')} />
+        <Card>
+          <Text style={[styles.demoDesc, { color: colors.textSecondary }]}>
+            {t('settings.loadSampleDesc')}
+          </Text>
+          <Button
+            label={t('common.loadSampleNote')}
+            onPress={handleLoadSample}
+            disabled={loadingSample}
+            variant="secondary"
+            icon={<FontAwesome5 name="magic" size={14} color={colors.primary} />}
+            style={{ marginTop: 8 }}
+          />
+        </Card>
 
         {/* ABOUT */}
         <SectionHeader title={t('settings.about')} />
@@ -662,5 +724,25 @@ const styles = StyleSheet.create({
   clearSection: {
     marginTop: 28,
     marginBottom: 20,
+  },
+  freeKeyLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: theme.radius.button,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  freeKeyText: {
+    fontFamily: theme.typography.fontFamily.bold,
+    fontSize: 13,
+  },
+  demoDesc: {
+    fontFamily: theme.typography.fontFamily.regular,
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 8,
   },
 });

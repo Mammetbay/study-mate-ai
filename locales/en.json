@@ -17,7 +17,12 @@
     "apiKeyRequired": "API Key Required",
     "apiKeyRequiredMessage": "Please set your {{provider}} API key in Settings first.",
     "capabilityNotSupported": "{{provider}} does not support {{capability}}",
-    "sttNotSupported": "This provider doesn't support audio transcription"
+    "sttNotSupported": "This provider doesn't support audio transcription",
+    "share": "Share",
+    "shareNote": "Share Note",
+    "loadSampleNote": "Load Sample Lecture (Demo)",
+    "sampleLoaded": "Sample lecture loaded! You can now explore summaries, quizzes, and flashcards.",
+    "freeKeyTip": "Get Free Key (No card)"
   },
   "tabs": {
     "home": "Home",
@@ -45,7 +50,8 @@
     "recentNotes": "Recent Notes",
     "noNotesYet": "No notes yet",
     "noNotesDesc": "Record a lecture or scan your notes to get started.",
-    "createFirstNote": "Create Your First Note"
+    "createFirstNote": "Create Your First Note",
+    "loadSample": "Try Sample Lecture"
   },
   "notes": {
     "title": "Notes",
@@ -56,7 +62,8 @@
     "lecture": "Lecture",
     "photo": "Photo",
     "emptyTitle": "No notes yet",
-    "emptyDesc": "Tap the + button to create your first note."
+    "emptyDesc": "Tap the + button to create your first note.",
+    "loadSample": "Load Sample Lecture"
   },
   "createNote": {
     "title": "New Note",
@@ -128,6 +135,7 @@
     "generateFlashcards": "Generate Flashcards",
     "generatingFlashcards": "Generating Flashcards...",
     "openFlashcards": "Open Flashcards",
+    "shareSummary": "Share Summary",
     "notFound": "Note not found"
   },
   "settings": {
@@ -154,6 +162,10 @@
     "apiKeyPlaceholder": "Enter your {{provider}} API key",
     "apiKeyHint": "Your key is stored locally and never shared. Used for AI transcription, summaries, and quiz generation.",
     "saveKey": "Save Key",
+    "freeKeys": "FREE AI OPTIONS",
+    "freeKeyNotice": "Get free API keys with no credit card required from Groq or Google Gemini.",
+    "demoSection": "DEMO & TESTING",
+    "loadSampleDesc": "Load an instant sample lecture with ready quizzes and flashcards without needing an API key.",
     "about": "ABOUT",
     "version": "Version",
     "privacyPolicy": "Privacy Policy",
