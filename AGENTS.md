@@ -9,7 +9,7 @@ Bu dosya AI kodlama ajanları (Claude Code, Kilo Code, Cursor) içindir. Görevi
 
 ## Proje Özeti
 
-React Native + Expo ile geliştirilen, satılabilir bir kod şablonu (Codester). Ses kaydı veya fotoğraftan otomatik transkript, özet, quiz ve flashcard üreten bir öğrenci uygulaması. Detay: `docs/studymate-ai-scope.md`.
+React Native + Expo ile geliştirilen, açık kaynaklı (Open Source) yerel AI ders asistanı. Ses kaydı veya fotoğraftan otomatik transkript, özet, quiz ve flashcard üreten bir öğrenci uygulaması. Detay: `docs/studymate-ai-scope.md`.
 
 ## Tech Stack (sabit, değiştirme)
 

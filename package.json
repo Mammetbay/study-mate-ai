@@ -1,7 +1,26 @@
 {
-  "name": "studymate_ai",
-  "main": "expo-router/entry",
+  "name": "studymate-ai",
   "version": "1.0.0",
+  "description": "Free, open-source & local-first AI study assistant. Turn lecture audios and handwritten notes into summaries, quizzes, and spaced-repetition flashcards.",
+  "license": "MIT",
+  "homepage": "https://github.com/studymate-ai/studymate-ai#readme",
+  "keywords": [
+    "ai",
+    "student",
+    "education",
+    "study-assistant",
+    "react-native",
+    "expo",
+    "whisper",
+    "groq",
+    "gemini",
+    "flashcards",
+    "quiz",
+    "spaced-repetition",
+    "local-first",
+    "sqlite"
+  ],
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",

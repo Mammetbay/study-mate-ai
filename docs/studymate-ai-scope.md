@@ -2,11 +2,11 @@
 
 ## 1. Proje Özeti
 
-**Ne:** Ders notlarını sesli kayıttan otomatik transkripte, özete, quiz'e ve flashcard'a çeviren React Native + Expo mobil uygulama şablonu (Codester'da satılacak kaynak kod ürünü).
+**Ne:** Ders notlarını sesli kayıttan veya fotoğraftan otomatik transkripte, özete, quiz'e ve flashcard'a çeviren React Native + Expo açık kaynaklı mobil öğrenci asistanı (Open Source).
 
-**Kimin için (Codester alıcısı):** Kendi eğitim/öğrenci odaklı mobil uygulamasını hızlıca kurmak isteyen indie geliştiriciler, ed-tech ajansları, özel ders/kurs işletmeleri.
+**Kimin için:** Derslerini daha verimli çalışmak, akılda kalıcılığı artırmak ve pahalı aboneliklere para ödemeden kendi cihazında ücretsiz AI modelleriyle çalışmak isteyen öğrenciler ve indie geliştiriciler.
 
-**Bu bir SaaS DEĞİL:** Alıcı ürünü satın alır, kullanıcı seçtiği AI sağlayıcının (Groq/OpenAI/Gemini/OpenRouter) API key'ini uygulama içi ayarlardan girer, kendi markasıyla yayınlar. Backend, kullanıcı yönetimi, billing sistemi bu üründe yok — bilinçli olarak yok.
+**Bu bir SaaS DEĞİL (Local-First):** Kullanıcı seçtiği AI sağlayıcının (Groq/OpenAI/Gemini/OpenRouter) ücretsiz veya kendi API key'ini uygulama içi ayarlardan girer. Tüm veriler kullanıcının cihazında yerel SQLite veritabanında saklanır. Backend, kullanıcı yönetimi, billing sistemi bu üründe yok — bilinçli olarak yok.
 
 ---
 
@@ -187,12 +187,13 @@ Fotoğraf/OCR özelliği eklendiği için takvim ~1-2 gün uzadı — aşağıda
 
 ---
 
-## 8. Codester Teslim Gereksinimleri (unutma, en kritik kısım)
+## 8. Açık Kaynak Standartları ve Yayın Kontrol Listesi
 
-- [ ] Kurulum dokümantasyonu (PDF veya markdown)
-- [ ] Kullanılan tüm icon/font'ların ticari lisans uygunluğu kontrol edilmiş
-- [ ] Temiz, yorumlu kod (hardcoded API key YOK)
-- [ ] Gerçek cihazda test edilmiş ekran görüntüleri (min. 5-6 adet)
-- [ ] Demo GIF veya kısa video
-- [ ] `.env.example` dosyası dahil
-- [ ] Listing metni (ürün açıklaması, özellik listesi, kimin için)
+- [x] MIT Lisansı (`LICENSE`) dahil edildi
+- [x] Detaylı README (rozetler, mimari şeması, özellik tablosu, ekran görüntüleri)
+- [x] Topluluk dosyaları (`CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, Issue & PR şablonları)
+- [x] Temiz, tip güvenli kod (`npx tsc --noEmit` hatasız, hardcoded API key YOK)
+- [x] Demo / Örnek ders yükleyici (kullanıcı API key almadan anında deneyimleyebilir)
+- [x] Not özeti ve içeriği paylaşma / dışa aktarma (Share API)
+- [x] `.env.example` ve kurulum kılavuzu (`docs/SETUP.md`) dahil
+

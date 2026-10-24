@@ -62,9 +62,9 @@ Model lists are fetched **live** from the provider's API — nothing is hardcode
 > provider lacks a capability, that feature is disabled until a suitable model
 > is selected.
 
-## 4. Rebranding
+## 4. Customization & Configuration
 
-Everything a buyer typically changes lives in a few places:
+Everything a developer or contributor typically customizes lives in a few places:
 
 | What | Where |
 |---|---|

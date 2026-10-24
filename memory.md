@@ -147,3 +147,14 @@ scope §8'deki bayat/eksik teslim dosyaları çoklu-sağlayıcı gerçeğine gö
 
 *   **Grid snapping:** `STEP=5` olduğu için 1'den +5 → 6 (grid dışı) oluyordu. Artık increment `(Math.floor(v/STEP)+1)*STEP`, decrement `(Math.ceil(v/STEP)-1)*STEP` ile temiz katlara oturuyor (1→5→10…, 6→5). MIN=1 clamp korunuyor (5'ten decrement → 1).
 *   **Klavye girişi:** Büyük sayıya dokununca (`TouchableOpacity`) `TextInput`'e dönüşüyor (`number-pad`, autoFocus, selectTextOnFocus, maxLength 3, sadece rakam). `onBlur`/`onSubmitEditing` → parse + clamp(1-200), geçersizse eski değere döner. Yeni i18n metni yok. `tsc --noEmit` temiz.
+
+## [2026-10-24] - Açık Kaynak Dönüşümü & GitHub Star Optimizasyonu (Open Source Overhaul)
+Proje, ticari kod şablonu kimliğinden çıkarılıp GitHub'da yıldız toplayacak, topluluk destekli açık kaynaklı bir öğrenci asistanına dönüştürüldü.
+
+*   **MIT Lisansı & Paket Yapılandırması:** Kök dizine `LICENSE` (MIT) eklendi; `package.json` ve `app.json` dosyaları `studymate-ai` ismi, etiketler (keywords), açıklama ve açık kaynak meta verileriyle güncellendi.
+*   **Topluluk Altyapısı (Community Health):** `.github/` klasörü altına `ISSUE_TEMPLATE/bug_report.md`, `ISSUE_TEMPLATE/feature_request.md` ve `PULL_REQUEST_TEMPLATE.md` eklendi. Katkı sağlamak isteyenler için kapsamlı `CONTRIBUTING.md` ve `CODE_OF_CONDUCT.md` yazıldı.
+*   **Vitrin README Yenilenmesi:** `README.md` görsel rozetler (MIT, Expo 54, React Native, TypeScript, PRs Welcome, Local-First), Mermaid mimari diyagramı, özellikler matrisi, 60 saniyelik hızlı başlangıç ve öğrenciler için %100 ücretsiz API (Groq & Gemini) rehberini içeren etkileyici bir açık kaynak vitrini haline getirildi.
+*   **"Instant Wow" Demo / Örnek Ders Yükleyici (`lib/sampleData.ts`):** Projeyi klonlayan bir kullanıcının API anahtarı aramadan uygulamayı tüm özellikleriyle test edebilmesi için tek tıkla zengin ders içeriği (ses kaydı, maddeli özet, 4 soruluk interaktif quiz ve 6 adet aralıklı tekrar flashcard'ı) yükleyen mekanizma geliştirildi. Bu özellik `Settings`, `Home` boş kartı ve `Notes` boş durumuna bağlandı.
+*   **Not & Özet Paylaşma (Share API):** `app/note/[id].tsx` başlığına Paylaş butonu eklendi; React Native `Share` API ile not başlığı, özeti ve transkripti arkadaşlara tek tıkla aktarılabiliyor.
+*   **Ayarlar Ekranında Ücretsiz Key Linkleri:** Seçili sağlayıcıya göre doğrudan konsol linki (Groq, Gemini vb.) gösterilerek öğrencilerin kredi kartsız ücretsiz key alması kolaylaştırıldı.
+*   **i18n & Tip Senkronizasyonu:** Yeni tüm metinler `locales/en.json` ve `locales/tr.json` içine eklendi; `npx tsc --noEmit` sıfır hatayla geçti.

@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "StudyMate_AI",
-    "slug": "StudyMate_AI",
+    "name": "StudyMate AI",
+    "slug": "studymate-ai",
+    "description": "Free, open-source & local-first AI study assistant. Turn lecture audios and notes into summaries, quizzes, and flashcards.",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
