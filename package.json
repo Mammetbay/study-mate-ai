@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "description": "Free, open-source & local-first AI study assistant. Turn lecture audios and handwritten notes into summaries, quizzes, and spaced-repetition flashcards.",
   "license": "MIT",
-  "homepage": "https://github.com/studymate-ai/studymate-ai#readme",
+  "homepage": "https://github.com/Mammetbay/study-mate-ai#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mammetbay/study-mate-ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mammetbay/study-mate-ai/issues"
+  },
   "keywords": [
     "ai",
     "student",

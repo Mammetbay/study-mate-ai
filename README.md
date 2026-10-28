@@ -97,8 +97,8 @@ flowchart TD
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/studymate-ai/studymate-ai.git
-cd studymate-ai
+git clone https://github.com/Mammetbay/study-mate-ai.git
+cd study-mate-ai
 npm install
 ```
 
@@ -174,7 +174,7 @@ studymate-ai/
 
 We welcome contributions from students, teachers, and developers around the world!
 
-- 🐛 **Found a bug?** Open an [Issue](https://github.com/studymate-ai/studymate-ai/issues).
+- 🐛 **Found a bug?** Open an [Issue](https://github.com/Mammetbay/study-mate-ai/issues).
 - 💡 **Have a feature idea?** Start a discussion or submit a feature request.
 - 🌍 **Speak another language?** Adding a new language is as easy as adding one file to `locales/`! See [CONTRIBUTING.md](CONTRIBUTING.md).
 

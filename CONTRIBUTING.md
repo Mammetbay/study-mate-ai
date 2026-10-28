@@ -89,7 +89,7 @@ npm run lint
    ```bash
    git push origin feature/my-awesome-improvement
    ```
-4. Open a Pull Request against `studymate-ai/studymate-ai` `main` branch.
+4. Open a Pull Request against `Mammetbay/study-mate-ai` `master` branch.
 5. Fill out the PR template with clear context and screenshots if UI changes are involved.
 
 ---
